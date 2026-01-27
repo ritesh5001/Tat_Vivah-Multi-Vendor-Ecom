@@ -1,0 +1,138 @@
+import { apiRequest } from "@/services/api";
+
+export interface SellerProduct {
+  id: string;
+  title: string;
+  description?: string | null;
+  isPublished: boolean;
+  category?: {
+    id: string;
+    name: string;
+  };
+  variants: Array<{
+    id: string;
+    sku: string;
+    price: number;
+    compareAtPrice?: number | null;
+    inventory?: {
+      stock: number;
+    } | null;
+  }>;
+}
+
+export interface SellerProductListResponse {
+  products: SellerProduct[];
+}
+
+export interface CreateProductPayload {
+  categoryId: string;
+  title: string;
+  description?: string;
+  isPublished?: boolean;
+  images?: string[];
+}
+
+export interface CreateVariantPayload {
+  sku: string;
+  price: number;
+  compareAtPrice?: number;
+  initialStock?: number;
+}
+
+export interface UpdateVariantPayload {
+  price?: number;
+  compareAtPrice?: number | null;
+}
+
+export async function listSellerProducts(token?: string | null) {
+  return apiRequest<SellerProductListResponse>("/v1/seller/products", {
+    method: "GET",
+    token,
+  });
+}
+
+export async function createSellerProduct(
+  payload: CreateProductPayload,
+  token?: string | null
+) {
+  return apiRequest<{ message: string; product: SellerProduct }>(
+    "/v1/seller/products",
+    {
+      method: "POST",
+      body: payload,
+      token,
+    }
+  );
+}
+
+export async function deleteSellerProduct(
+  productId: string,
+  token?: string | null
+) {
+  return apiRequest<{ message: string }>(`/v1/seller/products/${productId}`,
+    {
+      method: "DELETE",
+      token,
+    }
+  );
+}
+
+export async function updateSellerProduct(
+  productId: string,
+  payload: Partial<CreateProductPayload>,
+  token?: string | null
+) {
+  return apiRequest<{ message: string; product: SellerProduct }>(
+    `/v1/seller/products/${productId}`,
+    {
+      method: "PUT",
+      body: payload,
+      token,
+    }
+  );
+}
+
+export async function addVariantToProduct(
+  productId: string,
+  payload: CreateVariantPayload,
+  token?: string | null
+) {
+  return apiRequest<{ message: string; variant: SellerProduct["variants"][0] }>(
+    `/v1/seller/products/${productId}/variants`,
+    {
+      method: "POST",
+      body: payload,
+      token,
+    }
+  );
+}
+
+export async function updateVariantStock(
+  variantId: string,
+  stock: number,
+  token?: string | null
+) {
+  return apiRequest<{ message: string; inventory: { variantId: string; stock: number } }>(
+    `/v1/seller/products/variants/${variantId}/stock`,
+    {
+      method: "PUT",
+      body: { stock },
+      token,
+    }
+  );
+}
+
+export async function updateVariant(
+  variantId: string,
+  payload: UpdateVariantPayload,
+  token?: string | null
+) {
+  return apiRequest<{ message: string; variant: SellerProduct["variants"][0] }>(
+    `/v1/seller/products/variants/${variantId}`,
+    {
+      method: "PUT",
+      body: payload,
+      token,
+    }
+  );
+}

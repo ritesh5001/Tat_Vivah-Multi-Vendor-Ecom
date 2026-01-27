@@ -1,0 +1,70 @@
+import { z } from 'zod';
+/**
+ * Create Product Validation Schema
+ * POST /v1/seller/products
+ */
+export const createProductSchema = z.object({
+    categoryId: z
+        .string()
+        .min(1, 'Category ID is required'),
+    title: z
+        .string()
+        .min(3, 'Title must be at least 3 characters')
+        .max(255, 'Title must be at most 255 characters'),
+    description: z
+        .string()
+        .max(2000, 'Description must be at most 2000 characters')
+        .optional(),
+    isPublished: z
+        .boolean()
+        .optional()
+        .default(false),
+});
+/**
+ * Update Product Validation Schema
+ * PUT /v1/seller/products/:id
+ */
+export const updateProductSchema = z.object({
+    categoryId: z
+        .string()
+        .min(1, 'Category ID is required')
+        .optional(),
+    title: z
+        .string()
+        .min(3, 'Title must be at least 3 characters')
+        .max(255, 'Title must be at most 255 characters')
+        .optional(),
+    description: z
+        .string()
+        .max(2000, 'Description must be at most 2000 characters')
+        .optional(),
+    isPublished: z
+        .boolean()
+        .optional(),
+});
+/**
+ * Product Query Validation Schema
+ * GET /v1/products
+ */
+export const productQuerySchema = z.object({
+    page: z
+        .string()
+        .transform(Number)
+        .pipe(z.number().int().min(1))
+        .optional()
+        .default('1'),
+    limit: z
+        .string()
+        .transform(Number)
+        .pipe(z.number().int().min(1).max(100))
+        .optional()
+        .default('20'),
+    categoryId: z
+        .string()
+        .optional(),
+    search: z
+        .string()
+        .max(100)
+        .optional(),
+});
+//# sourceMappingURL=product.validation.js.map

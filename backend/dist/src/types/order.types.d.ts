@@ -1,0 +1,131 @@
+import type { $Enums } from '@prisma/client';
+export type OrderStatus = $Enums.OrderStatus;
+export type InventoryMovementType = $Enums.InventoryMovementType;
+/**
+ * Order entity as returned from database
+ */
+export interface OrderEntity {
+    id: string;
+    userId: string;
+    status: OrderStatus;
+    totalAmount: number;
+    createdAt: Date;
+}
+/**
+ * OrderItem entity as returned from database
+ */
+export interface OrderItemEntity {
+    id: string;
+    orderId: string;
+    sellerId: string;
+    productId: string;
+    variantId: string;
+    quantity: number;
+    priceSnapshot: number;
+}
+/**
+ * InventoryMovement entity as returned from database
+ */
+export interface InventoryMovementEntity {
+    id: string;
+    variantId: string;
+    orderId: string;
+    quantity: number;
+    type: InventoryMovementType;
+    createdAt: Date;
+}
+/**
+ * Order with items included
+ */
+export interface OrderWithItems extends OrderEntity {
+    items: OrderItemEntity[];
+}
+/**
+ * Order with items and movements (full detail)
+ */
+export interface OrderWithDetails extends OrderEntity {
+    items: OrderItemWithProduct[];
+    movements?: InventoryMovementEntity[];
+}
+/**
+ * Order item with product details for display
+ */
+export interface OrderItemWithProduct extends OrderItemEntity {
+    productTitle?: string;
+    variantSku?: string;
+}
+/**
+ * Seller's view of order items
+ */
+export interface SellerOrderItem extends OrderItemEntity {
+    order: {
+        id: string;
+        status: OrderStatus;
+        createdAt: Date;
+    };
+    productTitle: string | undefined;
+    variantSku: string | undefined;
+}
+/**
+ * Create order request (internal use)
+ */
+export interface CreateOrderRequest {
+    userId: string;
+    totalAmount: number;
+    items: CreateOrderItemRequest[];
+}
+/**
+ * Create order item request (internal use)
+ */
+export interface CreateOrderItemRequest {
+    sellerId: string;
+    productId: string;
+    variantId: string;
+    quantity: number;
+    priceSnapshot: number;
+}
+/**
+ * Create inventory movement request
+ */
+export interface CreateInventoryMovementRequest {
+    variantId: string;
+    orderId: string;
+    quantity: number;
+    type: InventoryMovementType;
+}
+/**
+ * Order list response (buyer)
+ */
+export interface BuyerOrderListResponse {
+    orders: OrderWithItems[];
+}
+/**
+ * Order detail response (buyer)
+ */
+export interface BuyerOrderDetailResponse {
+    order: OrderWithDetails;
+}
+/**
+ * Checkout response
+ */
+export interface CheckoutResponse {
+    message: string;
+    order: OrderEntity;
+}
+/**
+ * Seller order list response
+ */
+export interface SellerOrderListResponse {
+    orderItems: SellerOrderItem[];
+}
+/**
+ * Seller order detail response
+ */
+export interface SellerOrderDetailResponse {
+    orderId: string;
+    status: OrderStatus;
+    createdAt: Date;
+    items: OrderItemWithProduct[];
+}
+export declare const _orderTypesModule = true;
+//# sourceMappingURL=order.types.d.ts.map
