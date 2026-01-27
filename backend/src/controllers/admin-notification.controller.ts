@@ -7,8 +7,8 @@ export class AdminNotificationController {
      */
     async listNotifications(req: Request, res: Response, next: NextFunction) {
         try {
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 20;
+            const page = parseInt(req.query.page as string || '1');
+            const limit = parseInt(req.query.limit as string || '20');
 
             const result = await notificationRepository.findAll(page, limit);
 

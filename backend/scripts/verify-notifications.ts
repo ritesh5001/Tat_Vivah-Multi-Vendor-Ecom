@@ -61,7 +61,7 @@ async function run() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(MOCK_BUYER)
         });
-        const regData = await regRes.json();
+        const regData = await regRes.json() as any;
         if (!regData.success) throw new Error('Buyer registration failed');
         buyerId = regData.data.user.id;
         buyerToken = regData.data.accessToken;
@@ -72,7 +72,7 @@ async function run() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...MOCK_SELLER, storeName: `Store ${Date.now()}` })
         });
-        const selData = await selRes.json();
+        const selData = await selRes.json() as any;
         if (!selData.success) throw new Error(`Seller registration failed: ${JSON.stringify(selData)}`);
         sellerId = selData.data.user.id;
         sellerToken = selData.data.accessToken;
@@ -93,7 +93,7 @@ async function run() {
                 categoryId: (await prisma.category.findFirst())?.id
             })
         });
-        const prodData = await prodRes.json();
+        const prodData = await prodRes.json() as any;
         if (!prodData.success) throw new Error('Product creation failed');
         productId = prodData.data.product.id;
         variantId = prodData.data.product.variants[0].id;
@@ -120,7 +120,7 @@ async function run() {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${buyerToken}` }
         });
-        const checkoutData = await checkoutRes.json();
+        const checkoutData = await checkoutRes.json() as any;
         if (!checkoutData.success) throw new Error('Checkout failed');
         orderId = checkoutData.data.order.id;
         console.log(`Order Placed: ${orderId}`);
@@ -173,7 +173,7 @@ async function run() {
                 estimatedDeliveryDate: new Date().toISOString()
             })
         });
-        const shipData = await shipRes.json();
+        const shipData = await shipRes.json() as any;
         shipmentId = shipData.data.id;
 
         // Mark Shipped

@@ -1,7 +1,8 @@
 import { Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 import { env } from '../config/env.js';
 import { prisma } from '../config/db.js';
+
 import { notificationRepository } from './notification.repository.js';
 import { sendEmail } from './email/resend.client.js';
 import { NotificationJobPayload, EmailTemplateResult } from './types.js';
@@ -11,7 +12,7 @@ import { orderDeliveredTemplate } from './email/templates/order-delivered.js';
 import { sellerNewOrderTemplate } from './email/templates/seller-new-order.js';
 import { adminAlertTemplate } from './email/templates/admin-alert.js';
 
-const connection = new IORedis(env.REDIS_URL, { maxRetriesPerRequest: null });
+const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
 
 export const notificationWorker = new Worker<NotificationJobPayload>('notification.queue', async (job) => {
     const { notificationId } = job.data;

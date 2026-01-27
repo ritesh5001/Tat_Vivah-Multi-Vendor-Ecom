@@ -1,10 +1,10 @@
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 import { env } from '../config/env.js';
 import { NotificationJobPayload } from './types.js';
 
 // BullMQ requires a dedicated Redis connection with maxRetriesPerRequest set to null
-const connection = new IORedis(env.REDIS_URL, {
+const connection = new Redis(env.REDIS_URL, {
     maxRetriesPerRequest: null,
 });
 
