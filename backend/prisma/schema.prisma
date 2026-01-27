@@ -1,7 +1,3 @@
-// Prisma Schema for AUTH MICROSERVICE
-// This service handles ONLY: Authentication, Authorization, Token issuance, Sessions
-// Database: PostgreSQL (Neon) - ISOLATED from other services
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,51 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
-// ENUMS
-// ============================================================================
-
-enum Role {
-  USER
-  SELLER
-  ADMIN
-  QA_ADMIN
-  SUPER_ADMIN
-}
-
-enum UserStatus {
-  PENDING
-  ACTIVE
-  SUSPENDED
-}
-
-// ============================================================================
-// CORE TABLES (AUTH SERVICE ONLY)
-// ============================================================================
-
 /// Core user table for authentication
 /// Minimal data - profiles are managed by their respective microservices
 /// Note: email and phone are optional, but at least one must exist (enforced in application)
 model User {
-  id              String     @id @default(uuid())
-  email           String?    @unique
-  phone           String?    @unique
-  passwordHash    String     @map("password_hash")
-  role            Role
-  status          UserStatus
-  isEmailVerified Boolean    @default(false) @map("is_email_verified")
-  isPhoneVerified Boolean    @default(false) @map("is_phone_verified")
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
-
-  // Relations within AUTH service only
-  loginSessions     LoginSession[]
-  adminProfile      AdminProfile?
-  qaAdminProfile    QaAdminProfile?
-  superAdminProfile SuperAdminProfile?
-
-  // Product relations (Seller only)
-  products Product[]
+  id                 String              @id @default(uuid())
+  email              String?             @unique
+  phone              String?             @unique
+  passwordHash       String              @map("password_hash")
+  role               Role
+  status             UserStatus
+  isEmailVerified    Boolean             @default(false) @map("is_email_verified")
+  isPhoneVerified    Boolean             @default(false) @map("is_phone_verified")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  adminProfile       AdminProfile?
+  audit_logs         AuditLog[]
+  buyer_profiles     buyer_profiles?
+  loginSessions      LoginSession[]
+  product_moderation ProductModeration[]
+  products           Product[]
+  qaAdminProfile     QaAdminProfile?
+  seller_profiles    seller_profiles?
+  shipments          shipments[]
+  superAdminProfile  SuperAdminProfile?
+  user_addresses     user_addresses[]
+  user_preferences   user_preferences?
+  user_profiles      user_profiles?
 
   @@map("users")
 }
@@ -71,18 +49,12 @@ model LoginSession {
   expiresAt    DateTime @map("expires_at")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([refreshToken])
   @@map("login_sessions")
 }
-
-// ============================================================================
-// ADMIN PROFILE TABLES (AUTH SERVICE MANAGES THESE)
-// ============================================================================
 
 /// Profile data for admin users
 /// Managed by AUTH service since ADMIN creation is internal
@@ -96,9 +68,7 @@ model AdminProfile {
   designation String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admin_profiles")
 }
@@ -114,9 +84,7 @@ model QaAdminProfile {
   specialization String?
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("qa_admin_profiles")
 }
@@ -131,16 +99,10 @@ model SuperAdminProfile {
   phone     String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("super_admin_profiles")
 }
-
-// ============================================================================
-// PRODUCT & CATALOG DOMAIN
-// ============================================================================
 
 /// Product categories for organizing products
 model Category {
@@ -149,29 +111,26 @@ model Category {
   slug      String    @unique
   isActive  Boolean   @default(true) @map("is_active")
   createdAt DateTime  @default(now()) @map("created_at")
-
-  // Relations
-  products Product[]
+  products  Product[]
 
   @@map("categories")
 }
 
 /// Products owned by sellers
 model Product {
-  id          String           @id @default(cuid())
-  sellerId    String           @map("seller_id")
-  categoryId  String           @map("category_id")
+  id          String             @id @default(cuid())
+  sellerId    String             @map("seller_id")
+  categoryId  String             @map("category_id")
   title       String
   description String?
-  images      String[]         @default([]) @map("images")
-  isPublished Boolean          @default(false) @map("is_published")
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
-
-  // Relations
-  seller   User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  category Category         @relation(fields: [categoryId], references: [id])
-  variants ProductVariant[]
+  isPublished Boolean            @default(false) @map("is_published")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  images      String[]           @default([]) @map("images")
+  moderation  ProductModeration?
+  variants    ProductVariant[]
+  category    Category           @relation(fields: [categoryId], references: [id])
+  seller      User               @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
   @@index([sellerId])
   @@index([categoryId])
@@ -180,17 +139,15 @@ model Product {
 
 /// Product variants with pricing (e.g., size, color)
 model ProductVariant {
-  id             String    @id @default(cuid())
-  productId      String    @map("product_id")
-  sku            String    @unique
+  id             String     @id @default(cuid())
+  productId      String     @map("product_id")
+  sku            String     @unique
   price          Float
-  compareAtPrice Float?    @map("compare_at_price")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  inventory Inventory?
+  compareAtPrice Float?     @map("compare_at_price")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  inventory      Inventory?
+  product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@map("product_variants")
@@ -201,27 +158,9 @@ model Inventory {
   variantId String         @id @map("variant_id")
   stock     Int            @default(0)
   updatedAt DateTime       @updatedAt @map("updated_at")
-
-  // Relations
-  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@map("inventory")
-}
-
-// ============================================================================
-// CART & ORDERS DOMAIN
-// ============================================================================
-
-enum OrderStatus {
-  PLACED
-  CONFIRMED
-  CANCELLED
-}
-
-enum InventoryMovementType {
-  RESERVE
-  RELEASE
-  DEDUCT
 }
 
 /// Shopping cart for buyers (one per user)
@@ -229,9 +168,7 @@ model Cart {
   id        String     @id @default(cuid())
   userId    String     @unique @map("user_id")
   updatedAt DateTime   @updatedAt @map("updated_at")
-
-  // Relations
-  items CartItem[]
+  items     CartItem[]
 
   @@map("carts")
 }
@@ -245,9 +182,7 @@ model CartItem {
   quantity      Int
   priceSnapshot Float    @map("price_snapshot")
   createdAt     DateTime @default(now()) @map("created_at")
-
-  // Relations
-  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, variantId])
   @@index([cartId])
@@ -256,15 +191,15 @@ model CartItem {
 
 /// Orders placed by buyers
 model Order {
-  id          String      @id @default(cuid())
-  userId      String      @map("user_id")
-  status      OrderStatus @default(PLACED)
-  totalAmount Float       @map("total_amount")
-  createdAt   DateTime    @default(now()) @map("created_at")
-
-  // Relations
-  items     OrderItem[]
-  movements InventoryMovement[]
+  id          String              @id @default(cuid())
+  userId      String              @map("user_id")
+  status      OrderStatus         @default(PLACED)
+  totalAmount Float               @map("total_amount")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  movements   InventoryMovement[]
+  items       OrderItem[]
+  payment     Payment?
+  shipments   shipments[]
 
   @@index([userId])
   @@map("orders")
@@ -279,9 +214,7 @@ model OrderItem {
   variantId     String @map("variant_id")
   quantity      Int
   priceSnapshot Float  @map("price_snapshot")
-
-  // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order         Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([sellerId])
@@ -296,12 +229,345 @@ model InventoryMovement {
   quantity  Int
   type      InventoryMovementType
   createdAt DateTime              @default(now()) @map("created_at")
-
-  // Relations
-  order Order @relation(fields: [orderId], references: [id])
+  order     Order                 @relation(fields: [orderId], references: [id])
 
   @@index([variantId])
   @@index([orderId])
   @@map("inventory_movements")
 }
 
+/// Payments linked to Orders (1:1)
+model Payment {
+  id                String          @id @default(cuid())
+  orderId           String          @unique @map("order_id")
+  userId            String          @map("user_id")
+  amount            Float
+  currency          String          @default("INR")
+  status            PaymentStatus   @default(INITIATED)
+  provider          PaymentProvider @default(MOCK)
+  providerPaymentId String?         @map("provider_payment_id")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  events            PaymentEvent[]
+  order             Order           @relation(fields: [orderId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("payments")
+}
+
+/// Immutable ledger of payment lifecycle events
+model PaymentEvent {
+  id        String           @id @default(cuid())
+  paymentId String           @map("payment_id")
+  type      PaymentEventType
+  payload   Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+  payment   Payment          @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@map("payment_events")
+}
+
+/// Seller settlements for order items (Foundation)
+model SellerSettlement {
+  id          String           @id @default(cuid())
+  sellerId    String           @map("seller_id")
+  orderItemId String           @map("order_item_id")
+  amount      Float
+  status      SettlementStatus @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@index([sellerId])
+  @@index([status])
+  @@map("seller_settlements")
+}
+
+/// Audit logs for tracking all admin actions
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String      @map("actor_id")
+  action     String
+  entityType AuditEntity @map("entity_type")
+  entityId   String      @map("entity_id")
+  metadata   Json?
+  createdAt  DateTime    @default(now()) @map("created_at")
+  users      User        @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+/// Product moderation status for admin review
+model ProductModeration {
+  productId  String                  @id @map("product_id")
+  status     ProductModerationStatus @default(PENDING)
+  reason     String?
+  reviewedBy String?                 @map("reviewed_by")
+  reviewedAt DateTime?               @map("reviewed_at")
+  created_at DateTime                @default(now())
+  updated_at DateTime
+  product    Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+  users      User?                   @relation(fields: [reviewedBy], references: [id])
+
+  @@map("product_moderation")
+}
+
+model buyer_profiles {
+  user_id       String    @id
+  total_orders  Int       @default(0)
+  last_order_at DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime
+  users         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model seller_bank_accounts {
+  id                  String          @id
+  seller_id           String
+  bank_name           String
+  account_holder_name String
+  account_number      String
+  ifsc_code           String
+  is_primary          Boolean         @default(false)
+  created_at          DateTime        @default(now())
+  updated_at          DateTime
+  seller_profiles     seller_profiles @relation(fields: [seller_id], references: [user_id], onDelete: Cascade)
+
+  @@index([seller_id])
+}
+
+model seller_profiles {
+  user_id              String                 @id
+  store_name           String
+  store_slug           String                 @unique
+  business_type        BusinessType
+  gst_number           String?
+  pan_number           String?
+  kyc_status           KycStatus              @default(PENDING)
+  created_at           DateTime               @default(now())
+  updated_at           DateTime
+  seller_bank_accounts seller_bank_accounts[]
+  users                User                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model shipment_events {
+  id          String         @id
+  shipment_id String
+  status      ShipmentStatus
+  note        String?
+  created_at  DateTime       @default(now())
+  shipments   shipments      @relation(fields: [shipment_id], references: [id], onDelete: Cascade)
+
+  @@index([shipment_id])
+}
+
+model shipments {
+  id              String            @id
+  order_id        String
+  seller_id       String
+  carrier         String
+  tracking_number String
+  status          ShipmentStatus    @default(CREATED)
+  shipped_at      DateTime?
+  delivered_at    DateTime?
+  created_at      DateTime          @default(now())
+  updated_at      DateTime
+  shipment_events shipment_events[]
+  orders          Order             @relation(fields: [order_id], references: [id])
+  users           User              @relation(fields: [seller_id], references: [id])
+
+  @@index([order_id])
+  @@index([seller_id])
+}
+
+model user_addresses {
+  id             String       @id
+  user_id        String
+  label          AddressLabel @default(HOME)
+  address_line_1 String
+  address_line_2 String?
+  city           String
+  state          String
+  pincode        String
+  country        String       @default("India")
+  is_default     Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime
+  users          User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model user_preferences {
+  user_id             String   @id
+  language            String   @default("en")
+  email_notifications Boolean  @default(true)
+  sms_notifications   Boolean  @default(true)
+  created_at          DateTime @default(now())
+  updated_at          DateTime
+  users               User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model user_profiles {
+  user_id    String    @id
+  full_name  String
+  avatar     String?
+  dob        DateTime? @db.Date
+  gender     Gender?
+  created_at DateTime  @default(now())
+  updated_at DateTime
+  users      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+  QA_ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  CANCELLED
+  SHIPPED
+  DELIVERED
+}
+
+enum InventoryMovementType {
+  RESERVE
+  RELEASE
+  DEDUCT
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  MOCK
+  RAZORPAY
+  STRIPE
+}
+
+enum PaymentEventType {
+  INITIATED
+  SUCCESS
+  FAILED
+  WEBHOOK
+}
+
+enum SettlementStatus {
+  PENDING
+  PAID
+}
+
+enum AddressLabel {
+  HOME
+  OFFICE
+  OTHER
+}
+
+enum AuditEntity {
+  USER
+  PRODUCT
+  ORDER
+  PAYMENT
+}
+
+enum BusinessType {
+  INDIVIDUAL
+  PARTNERSHIP
+  PRIVATE_LIMITED
+  PUBLIC_LIMITED
+  LLP
+  PROPRIETORSHIP
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum ProductModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ShipmentStatus {
+  CREATED
+  SHIPPED
+  DELIVERED
+}
+
+/// Notifications for users (Buyers, Sellers, Admins)
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String?            @map("user_id")
+  role      Role?
+  type      NotificationType
+  channel   NotificationChannel
+  status    NotificationStatus
+  subject   String?
+  content   String
+  metadata  Json?
+  createdAt DateTime           @default(now()) @map("created_at")
+  sentAt    DateTime?          @map("sent_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("notifications")
+}
+
+model NotificationEvent {
+  id                 String             @id @default(cuid())
+  notificationId     String             @map("notification_id")
+  provider           String
+  providerMessageId  String?            @map("provider_message_id")
+  status             NotificationStatus
+  error              String?
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  @@index([notificationId])
+  @@map("notification_events")
+}
+
+enum NotificationType {
+  ORDER_PLACED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  SELLER_NEW_ORDER
+  SELLER_PRODUCT_REJECTED
+  ADMIN_ALERT
+}
+
+enum NotificationChannel {
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}

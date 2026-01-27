@@ -28,13 +28,16 @@
     "@types/ms": "^2.1.0",
     "@upstash/redis": "^1.36.1",
     "bcrypt": "^5.1.1",
+    "bullmq": "^5.67.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
     "imagekit": "^6.0.0",
+    "ioredis": "^5.9.2",
     "jsonwebtoken": "^9.0.2",
     "ms": "^2.1.3",
     "openapi3-ts": "^4.5.0",
+    "resend": "^6.9.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
