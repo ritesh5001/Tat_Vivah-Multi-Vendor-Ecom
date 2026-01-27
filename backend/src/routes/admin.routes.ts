@@ -63,6 +63,16 @@ adminRouter.get(
 );
 
 /**
+ * GET /v1/admin/products
+ * List all products
+ */
+adminRouter.get(
+    '/products',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.listAllProducts
+);
+
+/**
  * PUT /v1/admin/products/:id/approve
  * Approve a product
  */
@@ -80,6 +90,16 @@ adminRouter.put(
     '/products/:id/reject',
     authorize('ADMIN', 'SUPER_ADMIN'),
     adminController.rejectProduct
+);
+
+/**
+ * DELETE /v1/admin/products/:id
+ * Delete a product (soft delete)
+ */
+adminRouter.delete(
+    '/products/:id',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.deleteProduct
 );
 
 // ============================================================================

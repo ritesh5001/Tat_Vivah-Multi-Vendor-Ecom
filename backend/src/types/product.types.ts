@@ -26,6 +26,9 @@ export interface ProductEntity {
     description: string | null;
     images: string[];
     isPublished: boolean;
+    deletedByAdmin: boolean;
+    deletedByAdminAt: Date | null;
+    deletedByAdminReason: string | null;
     createdAt: Date;
     updatedAt: Date;
 }

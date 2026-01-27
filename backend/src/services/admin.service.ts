@@ -11,6 +11,7 @@ import {
     setCache,
     CACHE_KEYS,
     invalidateCache,
+    invalidateProductCaches,
 } from '../utils/cache.util.js';
 
 /**
@@ -108,6 +109,14 @@ export class AdminService {
     }
 
     /**
+     * List all products (admin table view)
+     */
+    async listAllProducts(): Promise<{ products: AdminProduct[] }> {
+        const products = await this.adminRepo.findAllProducts();
+        return { products };
+    }
+
+    /**
      * Approve a product
      */
     async approveProduct(productId: string, actorId: string): Promise<{ message: string; product: AdminProduct }> {
@@ -163,6 +172,44 @@ export class AdminService {
         return {
             message: 'Product rejected',
             product: updatedProduct,
+        };
+    }
+
+    /**
+     * Delete product by admin (soft delete)
+     */
+    async deleteProduct(
+        productId: string,
+        actorId: string,
+        reason?: string
+    ): Promise<{ message: string; product: AdminProduct }> {
+        const product = await this.adminRepo.findProductById(productId);
+        if (!product) {
+            throw ApiError.notFound('Product not found');
+        }
+
+        await this.adminRepo.updateProductModeration(
+            productId,
+            'REJECTED',
+            actorId,
+            reason ?? 'Deleted by admin'
+        );
+
+        const deleted = await this.adminRepo.markProductDeletedByAdmin(
+            productId,
+            reason
+        );
+
+        await invalidateProductCaches(productId);
+
+        await this.auditSvc.logAction(actorId, 'PRODUCT_DELETED', 'PRODUCT', productId, {
+            productTitle: product.title,
+            reason: reason ?? 'Deleted by admin',
+        });
+
+        return {
+            message: 'Product deleted by admin',
+            product: deleted,
         };
     }
 

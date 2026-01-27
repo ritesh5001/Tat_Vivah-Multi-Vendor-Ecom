@@ -26,8 +26,13 @@ export interface AdminProduct {
     id: string;
     title: string;
     sellerId: string;
+    sellerEmail: string | null;
     categoryId: string;
+    categoryName: string | null;
     isPublished: boolean;
+    deletedByAdmin: boolean;
+    deletedByAdminAt: Date | null;
+    deletedByAdminReason: string | null;
     createdAt: Date;
     moderation: {
         status: string;
@@ -157,8 +162,13 @@ export class AdminRepository {
             id: mod.product.id,
             title: mod.product.title,
             sellerId: mod.product.sellerId,
+            sellerEmail: null,
             categoryId: mod.product.categoryId,
+            categoryName: null,
             isPublished: mod.product.isPublished,
+            deletedByAdmin: mod.product.deletedByAdmin,
+            deletedByAdminAt: mod.product.deletedByAdminAt,
+            deletedByAdminReason: mod.product.deletedByAdminReason,
             createdAt: mod.product.createdAt,
             moderation: {
                 status: mod.status,
@@ -187,8 +197,13 @@ export class AdminRepository {
             id: product.id,
             title: product.title,
             sellerId: product.sellerId,
+            sellerEmail: null,
             categoryId: product.categoryId,
+            categoryName: null,
             isPublished: product.isPublished,
+            deletedByAdmin: product.deletedByAdmin,
+            deletedByAdminAt: product.deletedByAdminAt,
+            deletedByAdminReason: product.deletedByAdminReason,
             createdAt: product.createdAt,
             moderation: moderation
                 ? {
@@ -196,6 +211,85 @@ export class AdminRepository {
                     reason: moderation.reason,
                     reviewedBy: moderation.reviewedBy,
                     reviewedAt: moderation.reviewedAt,
+                }
+                : null,
+        };
+    }
+
+    /**
+     * List all products for admin view
+     */
+    async findAllProducts(): Promise<AdminProduct[]> {
+        const products = await prisma.product.findMany({
+            include: {
+                seller: { select: { email: true } },
+                category: { select: { name: true } },
+                moderation: true,
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return products.map((product) => ({
+            id: product.id,
+            title: product.title,
+            sellerId: product.sellerId,
+            sellerEmail: product.seller?.email ?? null,
+            categoryId: product.categoryId,
+            categoryName: product.category?.name ?? null,
+            isPublished: product.isPublished,
+            deletedByAdmin: product.deletedByAdmin,
+            deletedByAdminAt: product.deletedByAdminAt,
+            deletedByAdminReason: product.deletedByAdminReason,
+            createdAt: product.createdAt,
+            moderation: product.moderation
+                ? {
+                    status: product.moderation.status,
+                    reason: product.moderation.reason,
+                    reviewedBy: product.moderation.reviewedBy,
+                    reviewedAt: product.moderation.reviewedAt,
+                }
+                : null,
+        }));
+    }
+
+    /**
+     * Soft-delete a product by admin
+     */
+    async markProductDeletedByAdmin(
+        id: string,
+        reason?: string
+    ): Promise<AdminProduct> {
+        const product = await prisma.product.update({
+            where: { id },
+            data: {
+                isPublished: false,
+                deletedByAdmin: true,
+                deletedByAdminAt: new Date(),
+                deletedByAdminReason: reason ?? 'Deleted by admin',
+            },
+            include: {
+                moderation: true,
+            },
+        });
+
+        return {
+            id: product.id,
+            title: product.title,
+            sellerId: product.sellerId,
+            sellerEmail: null,
+            categoryId: product.categoryId,
+            categoryName: null,
+            isPublished: product.isPublished,
+            deletedByAdmin: product.deletedByAdmin,
+            deletedByAdminAt: product.deletedByAdminAt,
+            deletedByAdminReason: product.deletedByAdminReason,
+            createdAt: product.createdAt,
+            moderation: product.moderation
+                ? {
+                    status: product.moderation.status,
+                    reason: product.moderation.reason,
+                    reviewedBy: product.moderation.reviewedBy,
+                    reviewedAt: product.moderation.reviewedAt,
                 }
                 : null,
         };
@@ -247,8 +341,13 @@ export class AdminRepository {
             id: product.id,
             title: product.title,
             sellerId: product.sellerId,
+            sellerEmail: null,
             categoryId: product.categoryId,
+            categoryName: null,
             isPublished: product.isPublished,
+            deletedByAdmin: product.deletedByAdmin,
+            deletedByAdminAt: product.deletedByAdminAt,
+            deletedByAdminReason: product.deletedByAdminReason,
             createdAt: product.createdAt,
             moderation: moderation
                 ? {

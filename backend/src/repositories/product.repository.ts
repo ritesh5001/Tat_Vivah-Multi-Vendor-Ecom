@@ -25,6 +25,7 @@ export class ProductRepository {
 
         const where = {
             isPublished: true,
+            deletedByAdmin: false,
             ...(categoryId && { categoryId }),
             ...(search && {
                 OR: [
@@ -55,7 +56,7 @@ export class ProductRepository {
      */
     async findPublishedById(id: string): Promise<ProductWithDetails | null> {
         return prisma.product.findFirst({
-            where: { id, isPublished: true },
+            where: { id, isPublished: true, deletedByAdmin: false },
             include: {
                 category: true,
                 variants: {
