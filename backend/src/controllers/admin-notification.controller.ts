@@ -7,8 +7,8 @@ export class AdminNotificationController {
      */
     async listNotifications(req: Request, res: Response, next: NextFunction) {
         try {
-            const page = parseInt(req.query.page as string || '1');
-            const limit = parseInt(req.query.limit as string || '20');
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 20;
 
             const result = await notificationRepository.findAll(page, limit);
 
@@ -32,7 +32,7 @@ export class AdminNotificationController {
     async getNotification(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.params;
-            const notification = await notificationRepository.findById(id);
+            const notification = await notificationRepository.findById(id as string);
 
             if (!notification) {
                 res.status(404).json({ success: false, message: 'Notification not found' });

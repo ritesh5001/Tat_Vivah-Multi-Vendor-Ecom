@@ -15,6 +15,7 @@ import { adminAlertTemplate } from './email/templates/admin-alert.js';
 const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
 
 export const notificationWorker = new Worker<NotificationJobPayload>('notification.queue', async (job) => {
+    console.log(`Job ${job.id} started. Notification: ${job.data.notificationId}`); // LOG START
     const { notificationId } = job.data;
 
     try {

@@ -1,7 +1,6 @@
 
 import { prisma } from '../src/config/db.js';
 import { env } from '../src/config/env.js';
-import { notificationWorker } from '../src/notifications/notification.worker.js';
 
 // Configuration
 const BASE_URL = `http://localhost:${env.PORT}`;

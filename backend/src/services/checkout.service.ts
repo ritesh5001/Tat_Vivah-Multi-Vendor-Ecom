@@ -141,9 +141,13 @@ export class CheckoutService {
             return acc;
         }, {} as Record<string, number>);
 
+
         for (const [sellerId, count] of Object.entries(itemsBySeller)) {
             await notificationService.notifySellerNewOrder(sellerId, order.id, count);
         }
+
+        // Notify Buyer
+        await notificationService.notifyOrderPlaced(order.userId, order.id, Number(order.totalAmount));
 
         return {
             message: 'Order placed successfully',
