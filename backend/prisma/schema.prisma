@@ -124,6 +124,9 @@ model Product {
   title       String
   description String?
   isPublished Boolean            @default(false) @map("is_published")
+  deletedByAdmin Boolean          @default(false) @map("deleted_by_admin")
+  deletedByAdminAt DateTime?      @map("deleted_by_admin_at")
+  deletedByAdminReason String?    @map("deleted_by_admin_reason")
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
   images      String[]           @default([]) @map("images")
