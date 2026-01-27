@@ -245,7 +245,9 @@ model Payment {
   currency          String          @default("INR")
   status            PaymentStatus   @default(INITIATED)
   provider          PaymentProvider @default(MOCK)
-  providerPaymentId String?         @map("provider_payment_id")
+  providerOrderId   String?         @map("provider_order_id")   // Razorpay order_id
+  providerPaymentId String?         @map("provider_payment_id") // Razorpay payment_id
+  providerSignature String?         @map("provider_signature")  // Razorpay signature for audit
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
   events            PaymentEvent[]
@@ -253,6 +255,7 @@ model Payment {
 
   @@index([userId])
   @@index([status])
+  @@index([providerOrderId])
   @@map("payments")
 }
 

@@ -36,6 +36,11 @@ const envSchema = z.object({
     IMAGEKIT_PUBLIC_KEY: z.string().optional(),
     IMAGEKIT_PRIVATE_KEY: z.string().optional(),
     IMAGEKIT_URL_ENDPOINT: z.string().optional(),
+
+    // Razorpay
+    RAZORPAY_KEY_ID: z.string().optional(),
+    RAZORPAY_KEY_SECRET: z.string().optional(),
+    RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
 });
 
 /**

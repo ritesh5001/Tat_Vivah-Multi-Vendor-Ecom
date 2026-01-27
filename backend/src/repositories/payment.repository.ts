@@ -11,6 +11,7 @@ export class PaymentRepository {
         currency: string;
         provider: any;
         status: PaymentStatus;
+        providerOrderId?: string;
     }): Promise<Payment> {
         return prisma.payment.create({
             data
@@ -36,6 +37,20 @@ export class PaymentRepository {
         });
     }
 
+    async findByProviderOrderId(providerOrderId: string): Promise<Payment | null> {
+        return prisma.payment.findFirst({
+            where: { providerOrderId },
+            include: {
+                events: true,
+                order: {
+                    include: {
+                        items: true
+                    }
+                }
+            }
+        });
+    }
+
     async updatePaymentStatus(
         paymentId: string,
         status: PaymentStatus,
@@ -44,6 +59,30 @@ export class PaymentRepository {
         const data: any = { status };
         if (providerPaymentId) {
             data.providerPaymentId = providerPaymentId;
+        }
+
+        return prisma.payment.update({
+            where: { id: paymentId },
+            data
+        });
+    }
+
+    async updateProviderOrderId(paymentId: string, providerOrderId: string): Promise<Payment> {
+        return prisma.payment.update({
+            where: { id: paymentId },
+            data: { providerOrderId }
+        });
+    }
+
+    async updatePaymentWithSignature(
+        paymentId: string,
+        status: PaymentStatus,
+        providerPaymentId: string,
+        providerSignature?: string
+    ): Promise<Payment> {
+        const data: any = { status, providerPaymentId };
+        if (providerSignature) {
+            data.providerSignature = providerSignature;
         }
 
         return prisma.payment.update({
@@ -68,3 +107,4 @@ export class PaymentRepository {
 }
 
 export const paymentRepository = new PaymentRepository();
+
