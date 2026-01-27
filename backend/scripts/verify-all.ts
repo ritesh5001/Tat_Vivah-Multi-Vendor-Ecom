@@ -3,6 +3,7 @@ import { verifyProduct } from './verify-product.js';
 import { verifyCart } from './verify-cart.js';
 import { verifyOrders } from './verify-orders.js';
 import { verifyPayment } from './verify-payment.js';
+import { verifyAdmin } from './verify-admin.js';
 import { prisma } from './test-utils.js';
 
 async function runAll() {
@@ -16,6 +17,8 @@ async function runAll() {
         await verifyOrders();
         console.log('\n----------------------------------------\n');
         await verifyPayment();
+        console.log('\n----------------------------------------\n');
+        await verifyAdmin();
         console.log('\n✅ ALL SYSTEMS GO! ✨');
     } catch (error) {
         console.error('Verification failed:', error);
