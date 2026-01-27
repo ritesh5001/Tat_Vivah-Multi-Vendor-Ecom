@@ -32,7 +32,23 @@ async function verifyAuth() {
         process.exit(1);
     }
 
-    // 3. Login
+    // 2.5 Admin Registration
+    LOG.step(`Testing Admin Registration`);
+    const adminUser = {
+        firstName: `Admin`,
+        lastName: `Test${randomId}`,
+        email: `admin${randomId}@example.com`,
+        password: 'Password123!',
+        department: 'IT',
+        designation: 'Tester'
+    };
+    const adminReg = await request('/v1/auth/admin/register', 'POST', adminUser);
+    if (adminReg.status === 201) {
+        LOG.success('Admin Registration passed');
+    } else {
+        console.warn('⚠️ Admin Registration failed (Expected if endpoint disabled)', adminReg);
+    }
+
     LOG.step('Testing Login');
     const login = await request('/v1/auth/login', 'POST', {
         identifier: user.email,
