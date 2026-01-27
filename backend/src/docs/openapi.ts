@@ -67,6 +67,52 @@ export const openApiSpec: OpenAPIObject = {
             },
         },
 
+        "/v1/auth/admin/register": {
+            post: {
+                tags: ["Auth"],
+                summary: "Register Admin",
+                security: [], // Public endpoint
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["firstName", "lastName", "email", "password"],
+                                properties: {
+                                    firstName: { type: "string", example: "Jane" },
+                                    lastName: { type: "string", example: "Smith" },
+                                    email: { type: "string", example: "admin@test.com" },
+                                    phone: { type: "string", example: "9876543210" },
+                                    department: { type: "string", example: "IT" },
+                                    designation: { type: "string", example: "Manager" },
+                                    password: { type: "string", example: "SecureAdminPass123" },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "201": {
+                        description: "Admin registered successfully",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Admin registered successfully" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        description: "Email or phone already exists",
+                    },
+                },
+            },
+        },
+
         "/v1/seller/register": {
             post: {
                 tags: ["Auth"],
@@ -1660,6 +1706,34 @@ export const openApiSpec: OpenAPIObject = {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+
+        "/v1/imagekit/auth": {
+            get: {
+                tags: ["Utils"],
+                summary: "Get ImageKit Authenticator",
+                security: [],
+                responses: {
+                    "200": {
+                        description: "ImageKit Auth Parameters",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        token: { type: "string" },
+                                        expire: { type: "integer" },
+                                        signature: { type: "string" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        description: "ImageKit configuration missing"
                     }
                 }
             }
