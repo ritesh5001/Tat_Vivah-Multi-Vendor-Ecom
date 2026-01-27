@@ -12,6 +12,9 @@ import {
     checkoutRouter,
     orderRouter,
     sellerOrderRouter,
+    paymentRouter,
+    webhookRouter,
+    sellerSettlementRouter,
 } from './routes/index.js';
 import { apiReference } from "@scalar/express-api-reference";
 import { openApiSpec } from "./docs/openapi.js";
@@ -85,6 +88,11 @@ export function createApp(): Application {
     app.use('/v1/checkout', checkoutRouter);
     app.use('/v1/orders', orderRouter);
     app.use('/v1/seller/orders', sellerOrderRouter);
+
+    // Payments & Settlement domain
+    app.use('/v1/payments/webhook', webhookRouter); // Must be before /v1/payments to avoid auth middleware capture
+    app.use('/v1/payments', paymentRouter);
+    app.use('/v1/seller/settlements', sellerSettlementRouter);
 
     // =========================================================================
     // ERROR HANDLING

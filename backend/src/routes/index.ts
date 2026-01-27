@@ -10,9 +10,15 @@ export { productRouter } from './product.routes.js';
 export { sellerProductRouter } from './seller-product.routes.js';
 export { imagekitRouter } from './imagekit.routes.js';
 
+
 // Cart & Orders domain
 export { cartRouter } from './cart.routes.js';
 export { checkoutRouter } from './checkout.routes.js';
 export { orderRouter } from './order.routes.js';
 export { sellerOrderRouter } from './seller-order.routes.js';
+
+// Payment & Settlement domain
+export { paymentRoutes as paymentRouter } from './payment.routes.js';
+export { webhookRoutes as webhookRouter } from './webhook.routes.js';
+export { sellerSettlementRoutes as sellerSettlementRouter } from './seller-settlement.routes.js';
 

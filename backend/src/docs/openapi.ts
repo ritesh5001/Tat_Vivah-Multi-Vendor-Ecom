@@ -787,5 +787,131 @@ export const openApiSpec: OpenAPIObject = {
                 },
             },
         },
+
+        // =====================================================================
+        // PAYMENT ENDPOINTS
+        // =====================================================================
+        "/v1/payments/initiate": {
+            post: {
+                tags: ["Payments"],
+                summary: "Initiate payment flow",
+                description: "Starts a payment for an order. Creates a pending payment record and returns provider-specific checkout info.",
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["orderId", "provider"],
+                                properties: {
+                                    orderId: { type: "string" },
+                                    provider: { type: "string", enum: ["MOCK", "RAZORPAY", "STRIPE"] },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "Payment initiated",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        success: { type: "boolean" },
+                                        data: {
+                                            type: "object",
+                                            properties: {
+                                                paymentId: { type: "string" },
+                                                providerPaymentId: { type: "string" },
+                                                checkoutUrl: { type: "string" },
+                                                amount: { type: "number" },
+                                                currency: { type: "string" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { description: "Order already paid or invalid request" },
+                    "404": { description: "Order not found" },
+                },
+            },
+        },
+
+        "/v1/payments/{orderId}": {
+            get: {
+                tags: ["Payments"],
+                summary: "Get payment details",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "orderId", in: "path", required: true, schema: { type: "string" } },
+                ],
+                responses: {
+                    "200": { description: "Payment details" },
+                    "403": { description: "Unauthorized" },
+                    "404": { description: "Payment not found" },
+                },
+            },
+        },
+
+        "/v1/payments/webhook/{provider}": {
+            post: {
+                tags: ["Payments"],
+                summary: "Handle payment webhook",
+                description: "Receives status updates from payment providers. Public endpoint with signature verification.",
+                security: [], // Public
+                parameters: [
+                    { name: "provider", in: "path", required: true, schema: { type: "string" } },
+                ],
+                // We typically verify signatures via headers, but schema doesn't force documented headers
+                responses: {
+                    "200": { description: "Webhook processed" },
+                    "400": { description: "Invalid provider or signature" },
+                },
+            },
+        },
+
+        // =====================================================================
+        // SETTLEMENT ENDPOINTS (SELLER)
+        // =====================================================================
+        "/v1/seller/settlements": {
+            get: {
+                tags: ["Settlements"],
+                summary: "List seller settlements",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of settlements",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        success: { type: "boolean" },
+                                        data: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    amount: { type: "number" },
+                                                    status: { type: "string", enum: ["PENDING", "PAID", "FAILED"] },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": { description: "Not a seller" },
+                },
+            },
+        },
     },
 };

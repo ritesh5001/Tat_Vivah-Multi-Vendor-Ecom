@@ -57,6 +57,10 @@ model User {
   // Product relations (Seller only)
   products Product[]
 
+  // Payment & Settlement relations
+  payments    Payment[]
+  settlements SellerSettlement[]
+
   @@map("users")
 }
 
@@ -265,6 +269,7 @@ model Order {
   // Relations
   items     OrderItem[]
   movements InventoryMovement[]
+  payment   Payment?
 
   @@index([userId])
   @@map("orders")
@@ -281,7 +286,8 @@ model OrderItem {
   priceSnapshot Float  @map("price_snapshot")
 
   // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order      Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  settlement SellerSettlement?
 
   @@index([orderId])
   @@index([sellerId])
@@ -305,3 +311,87 @@ model InventoryMovement {
   @@map("inventory_movements")
 }
 
+
+// ============================================================================
+// PAYMENTS & SETTLEMENT DOMAIN
+// ============================================================================
+
+enum PaymentStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  RAZORPAY
+  STRIPE
+  MOCK
+}
+
+enum PaymentEventType {
+  INITIATED
+  SUCCESS
+  FAILED
+  WEBHOOK
+}
+
+enum SettlementStatus {
+  PENDING
+  PAID
+}
+
+/// Payments linked to Orders (1:1)
+model Payment {
+  id                String          @id @default(cuid())
+  orderId           String          @unique @map("order_id")
+  userId            String          @map("user_id")
+  amount            Float
+  currency          String          @default("INR")
+  status            PaymentStatus   @default(INITIATED)
+  provider          PaymentProvider
+  providerPaymentId String?         @map("provider_payment_id")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  order  Order          @relation(fields: [orderId], references: [id])
+  user   User           @relation(fields: [userId], references: [id])
+  events PaymentEvent[]
+
+  @@index([userId])
+  @@index([providerPaymentId])
+  @@map("payments")
+}
+
+/// Immutable ledger of payment lifecycle events
+model PaymentEvent {
+  id        String           @id @default(cuid())
+  paymentId String           @map("payment_id")
+  type      PaymentEventType
+  payload   Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@map("payment_events")
+}
+
+/// Seller settlements for order items (Foundation)
+model SellerSettlement {
+  id          String           @id @default(cuid())
+  sellerId    String           @map("seller_id")
+  orderItemId String           @unique @map("order_item_id")
+  amount      Float
+  status      SettlementStatus @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  seller    User      @relation(fields: [sellerId], references: [id])
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+
+  @@index([sellerId])
+  @@map("seller_settlements")
+}
