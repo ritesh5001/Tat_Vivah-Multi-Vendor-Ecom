@@ -1,20 +1,30 @@
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { webhookService } from '../services/webhook.service.js';
 import { asyncHandler } from '../middlewares/error.middleware.js';
 
 export class WebhookController {
 
-    handleWebhook = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-        const { provider } = req.params;
+    handleWebhook = asyncHandler(async (req: Request, res: Response) => {
+        const provider = req.params['provider'];
         const payload = req.body;
-        const signature = (req.headers['x-signature'] as string) || '';
 
-        if (!provider) {
+        if (!provider || typeof provider !== 'string') {
             throw new Error("Provider is required");
         }
 
-        await webhookService.processWebhook(provider, payload, signature);
+        // Get signature from appropriate header based on provider
+        let signature = '';
+        if (provider.toLowerCase() === 'razorpay') {
+            signature = (req.headers['x-razorpay-signature'] as string) || '';
+        } else {
+            signature = (req.headers['x-signature'] as string) || '';
+        }
+
+        // Pass raw body for signature verification (Razorpay needs this)
+        const rawBody = JSON.stringify(payload);
+
+        await webhookService.processWebhook(provider, payload, signature, rawBody);
 
         res.status(200).json({
             success: true,

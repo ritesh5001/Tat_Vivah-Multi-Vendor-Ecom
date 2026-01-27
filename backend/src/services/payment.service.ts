@@ -4,6 +4,7 @@ import { orderRepository } from '../repositories/order.repository.js';
 import { PaymentProvider, PaymentStatus, PaymentEventType, SettlementStatus, OrderStatus } from '@prisma/client';
 import { prisma } from '../config/db.js';
 import { ApiError } from '../errors/ApiError.js';
+import { razorpayService } from './razorpay.service.js';
 
 export class PaymentService {
 
@@ -46,7 +47,7 @@ export class PaymentService {
             payload: { provider, amount: order.totalAmount }
         });
 
-        // Mock Provider Response
+        // Handle MOCK Provider
         if (provider === PaymentProvider.MOCK) {
             return {
                 paymentId: payment.id,
@@ -57,8 +58,30 @@ export class PaymentService {
             };
         }
 
+        // Handle RAZORPAY Provider
+        if (provider === PaymentProvider.RAZORPAY) {
+            const razorpayOrder = await razorpayService.createOrder(
+                order.totalAmount,
+                'INR',
+                orderId,
+                { orderId, userId }
+            );
+
+            // Update payment with Razorpay order ID
+            await paymentRepository.updateProviderOrderId(payment.id, razorpayOrder.razorpayOrderId);
+
+            return {
+                paymentId: payment.id,
+                orderId: razorpayOrder.razorpayOrderId,
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                key: razorpayOrder.key,
+                provider: 'RAZORPAY'
+            };
+        }
+
         // Handle other providers (placeholder)
-        throw new ApiError(400, 'Provider not verified');
+        throw new ApiError(400, 'Provider not supported');
     }
 
     async getPaymentDetails(orderId: string, userId: string) {
