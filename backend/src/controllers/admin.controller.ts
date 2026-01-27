@@ -94,6 +94,23 @@ export const adminController = {
     },
 
     /**
+     * GET /v1/admin/products
+     * List all products
+     */
+    listAllProducts: async (
+        _req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const result = await adminService.listAllProducts();
+            res.json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    /**
      * PUT /v1/admin/products/:id/approve
      * Approve a product
      */
@@ -126,6 +143,26 @@ export const adminController = {
             const { reason } = req.body as { reason: string };
             const actorId = req.user!.userId as string;
             const result = await adminService.rejectProduct(id, reason, actorId);
+            res.json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    /**
+     * DELETE /v1/admin/products/:id
+     * Delete a product (soft delete)
+     */
+    deleteProduct: async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const id = req.params['id'] as string;
+            const actorId = req.user!.userId as string;
+            const { reason } = req.body as { reason?: string };
+            const result = await adminService.deleteProduct(id, actorId, reason);
             res.json(result);
         } catch (error) {
             next(error);
