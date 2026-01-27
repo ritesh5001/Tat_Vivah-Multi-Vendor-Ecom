@@ -13,6 +13,10 @@ export const CACHE_KEYS = {
     CART: (userId: string) => `cart:${userId}`,
     BUYER_ORDERS: (userId: string) => `orders:buyer:${userId}`,
     ORDER_DETAIL: (orderId: string) => `orders:detail:${orderId}`,
+
+    // Admin domain
+    ADMIN_ORDERS: 'admin:orders:list',
+    ADMIN_PAYMENTS: 'admin:payments:list',
 } as const;
 
 /**

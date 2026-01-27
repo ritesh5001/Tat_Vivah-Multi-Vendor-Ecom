@@ -913,5 +913,499 @@ export const openApiSpec: OpenAPIObject = {
                 },
             },
         },
+
+        // =====================================================================
+        // ADMIN ENDPOINTS
+        // =====================================================================
+
+        "/v1/admin/sellers": {
+            get: {
+                tags: ["Admin"],
+                summary: "List all sellers",
+                description: "List all sellers with their status. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of sellers",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        sellers: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    email: { type: "string" },
+                                                    phone: { type: "string" },
+                                                    role: { type: "string" },
+                                                    status: { type: "string", enum: ["PENDING", "ACTIVE", "SUSPENDED"] },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { description: "Unauthorized" },
+                    "403": { description: "Forbidden - requires ADMIN role" },
+                },
+            },
+        },
+
+        "/v1/admin/sellers/{id}/approve": {
+            put: {
+                tags: ["Admin"],
+                summary: "Approve a pending seller",
+                description: "Approves a seller and sets their status to ACTIVE. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" },
+                        description: "Seller user ID"
+                    }
+                ],
+                responses: {
+                    "200": {
+                        description: "Seller approved successfully",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Seller approved successfully" },
+                                        seller: { type: "object" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { description: "Seller is not pending approval" },
+                    "404": { description: "Seller not found" },
+                },
+            },
+        },
+
+        "/v1/admin/sellers/{id}/suspend": {
+            put: {
+                tags: ["Admin"],
+                summary: "Suspend a seller",
+                description: "Suspends a seller account. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" },
+                        description: "Seller user ID"
+                    }
+                ],
+                responses: {
+                    "200": {
+                        description: "Seller suspended successfully",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Seller suspended successfully" },
+                                        seller: { type: "object" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { description: "Seller is already suspended" },
+                    "404": { description: "Seller not found" },
+                },
+            },
+        },
+
+        "/v1/admin/products/pending": {
+            get: {
+                tags: ["Admin"],
+                summary: "List products pending moderation",
+                description: "Lists all products waiting for admin approval. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of pending products",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        products: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    title: { type: "string" },
+                                                    sellerId: { type: "string" },
+                                                    isPublished: { type: "boolean" },
+                                                    moderation: {
+                                                        type: "object",
+                                                        properties: {
+                                                            status: { type: "string", enum: ["PENDING", "APPROVED", "REJECTED"] },
+                                                            reason: { type: "string" },
+                                                            reviewedAt: { type: "string", format: "date-time" }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+        },
+
+        "/v1/admin/products/{id}/approve": {
+            put: {
+                tags: ["Admin"],
+                summary: "Approve a product",
+                description: "Approves a product and publishes it. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" },
+                        description: "Product ID"
+                    }
+                ],
+                responses: {
+                    "200": {
+                        description: "Product approved and published",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Product approved and published" },
+                                        product: { type: "object" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": { description: "Product not found" },
+                },
+            },
+        },
+
+        "/v1/admin/products/{id}/reject": {
+            put: {
+                tags: ["Admin"],
+                summary: "Reject a product",
+                description: "Rejects a product with a reason. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" },
+                        description: "Product ID"
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["reason"],
+                                properties: {
+                                    reason: { type: "string", example: "Product violates content policy" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": {
+                        description: "Product rejected",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Product rejected" },
+                                        product: { type: "object" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": { description: "Product not found" },
+                },
+            },
+        },
+
+        "/v1/admin/orders": {
+            get: {
+                tags: ["Admin"],
+                summary: "List all orders",
+                description: "Lists all orders in the system. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of orders",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        orders: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    userId: { type: "string" },
+                                                    status: { type: "string" },
+                                                    totalAmount: { type: "number" },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+        },
+
+        "/v1/admin/orders/{id}/cancel": {
+            put: {
+                tags: ["Admin"],
+                summary: "Cancel an order",
+                description: "Cancels an order (not for delivered orders). Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" },
+                        description: "Order ID"
+                    }
+                ],
+                responses: {
+                    "200": {
+                        description: "Order cancelled successfully",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Order cancelled successfully" },
+                                        order: { type: "object" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { description: "Cannot cancel delivered order" },
+                    "404": { description: "Order not found" },
+                },
+            },
+        },
+
+        "/v1/admin/orders/{id}/force-confirm": {
+            put: {
+                tags: ["Admin"],
+                summary: "Force confirm an order",
+                description: "Force confirms an order bypassing payment. Requires SUPER_ADMIN role only.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" },
+                        description: "Order ID"
+                    }
+                ],
+                responses: {
+                    "200": {
+                        description: "Order force-confirmed (payment bypassed)",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        message: { type: "string", example: "Order force-confirmed (payment bypassed)" },
+                                        order: { type: "object" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { description: "Cannot force confirm this order" },
+                    "403": { description: "Requires SUPER_ADMIN role" },
+                    "404": { description: "Order not found" },
+                },
+            },
+        },
+
+        "/v1/admin/payments": {
+            get: {
+                tags: ["Admin"],
+                summary: "List all payments",
+                description: "Lists all payments in the system (read-only). Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of payments",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        payments: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    orderId: { type: "string" },
+                                                    amount: { type: "number" },
+                                                    status: { type: "string", enum: ["INITIATED", "SUCCESS", "FAILED"] },
+                                                    provider: { type: "string" },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+        },
+
+        "/v1/admin/settlements": {
+            get: {
+                tags: ["Admin"],
+                summary: "List all settlements",
+                description: "Lists all seller settlements (read-only). Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of settlements",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        settlements: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    sellerId: { type: "string" },
+                                                    amount: { type: "number" },
+                                                    status: { type: "string", enum: ["PENDING", "PAID"] },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+        },
+
+        "/v1/admin/audit-logs": {
+            get: {
+                tags: ["Admin"],
+                summary: "List audit logs",
+                description: "Lists admin action audit logs with optional filters. Requires ADMIN or SUPER_ADMIN role.",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "entityType",
+                        in: "query",
+                        schema: { type: "string", enum: ["USER", "PRODUCT", "ORDER", "PAYMENT"] },
+                        description: "Filter by entity type"
+                    },
+                    {
+                        name: "entityId",
+                        in: "query",
+                        schema: { type: "string" },
+                        description: "Filter by entity ID"
+                    },
+                    {
+                        name: "actorId",
+                        in: "query",
+                        schema: { type: "string" },
+                        description: "Filter by admin user ID who performed the action"
+                    },
+                    {
+                        name: "startDate",
+                        in: "query",
+                        schema: { type: "string", format: "date-time" },
+                        description: "Filter logs after this date"
+                    },
+                    {
+                        name: "endDate",
+                        in: "query",
+                        schema: { type: "string", format: "date-time" },
+                        description: "Filter logs before this date"
+                    }
+                ],
+                responses: {
+                    "200": {
+                        description: "List of audit logs",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        auditLogs: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    actorId: { type: "string" },
+                                                    action: { type: "string" },
+                                                    entityType: { type: "string" },
+                                                    entityId: { type: "string" },
+                                                    metadata: { type: "object" },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+        },
     },
 };

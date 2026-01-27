@@ -22,3 +22,5 @@ export { paymentRoutes as paymentRouter } from './payment.routes.js';
 export { webhookRoutes as webhookRouter } from './webhook.routes.js';
 export { sellerSettlementRoutes as sellerSettlementRouter } from './seller-settlement.routes.js';
 
+// Admin domain
+export { adminRouter } from './admin.routes.js';
