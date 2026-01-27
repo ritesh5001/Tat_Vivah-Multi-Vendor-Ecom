@@ -520,3 +520,54 @@ enum ShipmentStatus {
   SHIPPED
   DELIVERED
 }
+
+/// Notifications for users (Buyers, Sellers, Admins)
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String?            @map("user_id")
+  role      Role?
+  type      NotificationType
+  channel   NotificationChannel
+  status    NotificationStatus
+  subject   String?
+  content   String
+  metadata  Json?
+  createdAt DateTime           @default(now()) @map("created_at")
+  sentAt    DateTime?          @map("sent_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("notifications")
+}
+
+model NotificationEvent {
+  id                 String             @id @default(cuid())
+  notificationId     String             @map("notification_id")
+  provider           String
+  providerMessageId  String?            @map("provider_message_id")
+  status             NotificationStatus
+  error              String?
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  @@index([notificationId])
+  @@map("notification_events")
+}
+
+enum NotificationType {
+  ORDER_PLACED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  SELLER_NEW_ORDER
+  SELLER_PRODUCT_REJECTED
+  ADMIN_ALERT
+}
+
+enum NotificationChannel {
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}

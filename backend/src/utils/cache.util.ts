@@ -17,6 +17,9 @@ export const CACHE_KEYS = {
     // Admin domain
     ADMIN_ORDERS: 'admin:orders:list',
     ADMIN_PAYMENTS: 'admin:payments:list',
+
+    // Shipping domain
+    TRACKING: (orderId: string) => `tracking:${orderId}`,
 } as const;
 
 /**

@@ -4,6 +4,7 @@ import {
     invalidateCache,
     CACHE_KEYS,
 } from '../utils/cache.util.js';
+import { notificationService } from '../notifications/notification.service.js';
 import { ApiError } from '../errors/ApiError.js';
 import type { CheckoutResponse } from '../types/order.types.js';
 
@@ -129,6 +130,20 @@ export class CheckoutService {
             ),
             invalidateCache(CACHE_KEYS.PRODUCTS_LIST),
         ]);
+
+        // 8. Trigger Notifications
+        // Notify Buyer
+        await notificationService.notifyOrderPlaced(userId, order.id, totalAmount);
+
+        // Notify Sellers
+        const itemsBySeller = itemsWithStock.reduce((acc, item) => {
+            acc[item.sellerId] = (acc[item.sellerId] || 0) + 1; // Count unique items per seller
+            return acc;
+        }, {} as Record<string, number>);
+
+        for (const [sellerId, count] of Object.entries(itemsBySeller)) {
+            await notificationService.notifySellerNewOrder(sellerId, order.id, count);
+        }
 
         return {
             message: 'Order placed successfully',

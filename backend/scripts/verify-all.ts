@@ -4,7 +4,10 @@ import { verifyCart } from './verify-cart.js';
 import { verifyOrders } from './verify-orders.js';
 import { verifyPayment } from './verify-payment.js';
 import { verifyAdmin } from './verify-admin.js';
-import { prisma } from './test-utils.js';
+import { verifyShipping } from './verify-shipping.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 async function runAll() {
     try {
@@ -19,6 +22,8 @@ async function runAll() {
         await verifyPayment();
         console.log('\n----------------------------------------\n');
         await verifyAdmin();
+        console.log('\n----------------------------------------\n');
+        await verifyShipping();
         console.log('\n✅ ALL SYSTEMS GO! ✨');
     } catch (error) {
         console.error('Verification failed:', error);

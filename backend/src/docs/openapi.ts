@@ -1407,5 +1407,262 @@ export const openApiSpec: OpenAPIObject = {
                 },
             },
         },
+        // =====================================================================
+        // SHIPPING ENDPOINTS
+        // =====================================================================
+        "/v1/orders/{orderId}/tracking": {
+            get: {
+                tags: ["Shipping (Buyer)"],
+                summary: "Get shipment tracking",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "orderId", in: "path", required: true, schema: { type: "string" } },
+                ],
+                responses: {
+                    "200": {
+                        description: "Tracking info",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        orderId: { type: "string" },
+                                        status: { type: "string" },
+                                        shipments: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    shipmentId: { type: "string" },
+                                                    trackingNumber: { type: "string" },
+                                                    carrier: { type: "string" },
+                                                    status: { type: "string" },
+                                                    estimatedDelivery: { type: "string", format: "date-time" },
+                                                    events: { type: "array", items: { type: "object" } }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": { description: "Not owner of order" },
+                },
+            },
+        },
+
+        "/v1/seller/shipments": {
+            get: {
+                tags: ["Shipping (Seller)"],
+                summary: "List seller's shipments",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": { description: "List of shipments" },
+                    "403": { description: "Not a seller" },
+                },
+            },
+        },
+
+        "/v1/seller/shipments/{orderId}/create": {
+            post: {
+                tags: ["Shipping (Seller)"],
+                summary: "Create shipment",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "orderId", in: "path", required: true, schema: { type: "string" } },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["carrier", "trackingNumber"],
+                                properties: {
+                                    carrier: { type: "string" },
+                                    trackingNumber: { type: "string" },
+                                    estimatedDeliveryDate: { type: "string", format: "date-time" },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "201": { description: "Shipment created" },
+                    "400": { description: "Order not confirmed or all items shipped" },
+                },
+            },
+        },
+
+        "/v1/seller/shipments/{id}/ship": {
+            put: {
+                tags: ["Shipping (Seller)"],
+                summary: "Mark as SHIPPED",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "id", in: "path", required: true, schema: { type: "string" } },
+                ],
+                requestBody: {
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    note: { type: "string" },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "200": { description: "Status updated to SHIPPED" },
+                },
+            },
+        },
+
+        "/v1/seller/shipments/{id}/deliver": {
+            put: {
+                tags: ["Shipping (Seller)"],
+                summary: "Mark as DELIVERED",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "id", in: "path", required: true, schema: { type: "string" } },
+                ],
+                requestBody: {
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    note: { type: "string" },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "200": { description: "Status updated to DELIVERED" },
+                },
+            },
+        },
+
+        "/v1/admin/shipments/{id}/override-status": {
+            put: {
+                tags: ["Shipping (Admin)"],
+                summary: "Override shipment status",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "id", in: "path", required: true, schema: { type: "string" } },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["status", "note"],
+                                properties: {
+                                    status: { type: "string", enum: ["CREATED", "SHIPPED", "DELIVERED", "CANCELLED"] },
+                                    note: { type: "string" },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "200": { description: "Status overridden" },
+                    "403": { description: "Not an admin" },
+                },
+            },
+        },
+        // =====================================================================
+        // ADMIN NOTIFICATION ENDPOINTS
+        // =====================================================================
+        "/v1/admin/notifications": {
+            get: {
+                tags: ["Notifications (Admin)"],
+                summary: "List notifications",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "page", in: "query", schema: { type: "integer" } },
+                    { name: "limit", in: "query", schema: { type: "integer" } }
+                ],
+                responses: {
+                    "200": {
+                        description: "List of notifications",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        success: { type: "boolean" },
+                                        data: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    type: { type: "string" },
+                                                    channel: { type: "string" },
+                                                    status: { type: "string" },
+                                                    userId: { type: "string" },
+                                                    subject: { type: "string" },
+                                                    content: { type: "string" },
+                                                    createdAt: { type: "string", format: "date-time" }
+                                                }
+                                            }
+                                        },
+                                        meta: {
+                                            type: "object",
+                                            properties: {
+                                                total: { type: "integer" },
+                                                page: { type: "integer" },
+                                                limit: { type: "integer" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/notifications/{id}": {
+            get: {
+                tags: ["Notifications (Admin)"],
+                summary: "Get notification details",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "id", in: "path", required: true, schema: { type: "string" } }
+                ],
+                responses: {
+                    "200": {
+                        description: "Notification details",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        success: { type: "boolean" },
+                                        data: {
+                                            type: "object",
+                                            properties: {
+                                                id: { type: "string" },
+                                                type: { type: "string" },
+                                                content: { type: "string" },
+                                                metadata: { type: "object" },
+                                                events: { type: "array", items: { type: "object" } }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
     },
 };
