@@ -132,6 +132,8 @@ export class AdminService {
         // Set product as published
         const updatedProduct = await this.adminRepo.updateProductPublishStatus(productId, true);
 
+        await invalidateProductCaches(productId);
+
         // Log audit action
         await this.auditSvc.logAction(actorId, 'PRODUCT_APPROVED', 'PRODUCT', productId, {
             productTitle: product.title,
@@ -162,6 +164,8 @@ export class AdminService {
 
         // Ensure product is not published
         const updatedProduct = await this.adminRepo.updateProductPublishStatus(productId, false);
+
+        await invalidateProductCaches(productId);
 
         // Log audit action
         await this.auditSvc.logAction(actorId, 'PRODUCT_REJECTED', 'PRODUCT', productId, {

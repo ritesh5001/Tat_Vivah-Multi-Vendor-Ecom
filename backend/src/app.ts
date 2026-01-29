@@ -142,7 +142,11 @@ export function createApp(): Application {
     app.use('/v1/admin/notifications', adminNotificationRouter);
 
     // Initialize Notification Worker
-    console.log(`[Worker] Notification Worker initialized: ${notificationWorker.name}`);
+    if (notificationWorker) {
+        console.log(`[Worker] Notification Worker initialized: ${notificationWorker.name}`);
+    } else {
+        console.log('[Worker] Notification Worker disabled (no REDIS_URL).');
+    }
 
     // =========================================================================
     // ERROR HANDLING

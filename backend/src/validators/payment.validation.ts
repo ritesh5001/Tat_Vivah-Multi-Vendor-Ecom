@@ -9,6 +9,14 @@ export const initiatePaymentSchema = z.object({
     })
 });
 
+export const verifyPaymentSchema = z.object({
+    body: z.object({
+        razorpayOrderId: z.string().min(1),
+        razorpayPaymentId: z.string().min(1),
+        razorpaySignature: z.string().min(1)
+    })
+});
+
 export const webhookSchema = z.object({
     params: z.object({
         provider: z.string() // Validated in service, but we can refine here if needed

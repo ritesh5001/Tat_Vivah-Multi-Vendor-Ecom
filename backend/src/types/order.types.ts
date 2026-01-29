@@ -17,6 +17,13 @@ export interface OrderEntity {
     userId: string;
     status: OrderStatus;
     totalAmount: number;
+    shippingName?: string | null;
+    shippingPhone?: string | null;
+    shippingEmail?: string | null;
+    shippingAddressLine1?: string | null;
+    shippingAddressLine2?: string | null;
+    shippingCity?: string | null;
+    shippingNotes?: string | null;
     createdAt: Date;
 }
 
@@ -80,6 +87,13 @@ export interface SellerOrderItem extends OrderItemEntity {
         id: string;
         status: OrderStatus;
         createdAt: Date;
+        shippingName?: string | null;
+        shippingPhone?: string | null;
+        shippingEmail?: string | null;
+        shippingAddressLine1?: string | null;
+        shippingAddressLine2?: string | null;
+        shippingCity?: string | null;
+        shippingNotes?: string | null;
     };
     productTitle: string | undefined;
     variantSku: string | undefined;
@@ -95,6 +109,13 @@ export interface SellerOrderItem extends OrderItemEntity {
 export interface CreateOrderRequest {
     userId: string;
     totalAmount: number;
+    shippingName?: string | null;
+    shippingPhone?: string | null;
+    shippingEmail?: string | null;
+    shippingAddressLine1?: string | null;
+    shippingAddressLine2?: string | null;
+    shippingCity?: string | null;
+    shippingNotes?: string | null;
     items: CreateOrderItemRequest[];
 }
 
