@@ -5,6 +5,9 @@ export interface SellerProduct {
   title: string;
   description?: string | null;
   isPublished: boolean;
+  deletedByAdmin?: boolean;
+  deletedByAdminAt?: string | null;
+  deletedByAdminReason?: string | null;
   category?: {
     id: string;
     name: string;

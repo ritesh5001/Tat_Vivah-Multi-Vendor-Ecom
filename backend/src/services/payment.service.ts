@@ -96,7 +96,47 @@ export class PaymentService {
         return payment;
     }
 
-    async handlePaymentSuccess(paymentId: string, providerPaymentId: string, payload: any) {
+    async verifyRazorpayPayment(
+        userId: string,
+        razorpayOrderId: string,
+        razorpayPaymentId: string,
+        razorpaySignature: string
+    ) {
+        const isValid = razorpayService.verifyPaymentSignature(
+            razorpayOrderId,
+            razorpayPaymentId,
+            razorpaySignature
+        );
+
+        if (!isValid) {
+            throw new ApiError(401, 'Invalid payment signature');
+        }
+
+        const payment = await paymentRepository.findByProviderOrderId(razorpayOrderId);
+        if (!payment) {
+            throw new ApiError(404, 'Payment not found');
+        }
+
+        if (payment.userId !== userId) {
+            throw new ApiError(403, 'Unauthorized');
+        }
+
+        await this.handlePaymentSuccess(
+            payment.id,
+            razorpayPaymentId,
+            { razorpayOrderId, razorpayPaymentId },
+            razorpaySignature
+        );
+
+        return { message: 'Payment verified', paymentId: payment.id };
+    }
+
+    async handlePaymentSuccess(
+        paymentId: string,
+        providerPaymentId: string,
+        payload: any,
+        providerSignature?: string
+    ) {
         const payment = await paymentRepository.findPaymentById(paymentId);
         if (!payment) return;
         if (payment.status === PaymentStatus.SUCCESS) return; // Idempotency
@@ -108,7 +148,8 @@ export class PaymentService {
                 where: { id: paymentId },
                 data: {
                     status: PaymentStatus.SUCCESS,
-                    providerPaymentId
+                    providerPaymentId,
+                    ...(providerSignature ? { providerSignature } : {})
                 }
             });
 

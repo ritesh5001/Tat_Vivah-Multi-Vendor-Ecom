@@ -211,9 +211,9 @@ export class ProductService {
         }
 
         // Check SKU uniqueness
-        const skuExists = await this.variantRepo.skuExists(data.sku);
+        const skuExists = await this.variantRepo.skuExists(productId, data.sku);
         if (skuExists) {
-            throw ApiError.conflict('SKU already exists');
+            throw ApiError.conflict('SKU already exists for this product');
         }
 
         const variant = await this.variantRepo.create(productId, data);

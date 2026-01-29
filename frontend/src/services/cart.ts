@@ -91,9 +91,21 @@ export async function removeCartItem(
   });
 }
 
-export async function checkout(token?: string | null) {
+export async function checkout(
+  payload?: {
+    shippingName?: string;
+    shippingPhone?: string;
+    shippingEmail?: string;
+    shippingAddressLine1?: string;
+    shippingAddressLine2?: string;
+    shippingCity?: string;
+    shippingNotes?: string;
+  },
+  token?: string | null
+) {
   return apiRequest<{ message: string; order: { id: string } }>("/v1/checkout", {
     method: "POST",
+    body: payload ?? {},
     token,
   });
 }

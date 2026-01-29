@@ -12,9 +12,16 @@ import { orderDeliveredTemplate } from './email/templates/order-delivered.js';
 import { sellerNewOrderTemplate } from './email/templates/seller-new-order.js';
 import { adminAlertTemplate } from './email/templates/admin-alert.js';
 
-const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
+if (!env.REDIS_URL) {
+    console.warn('REDIS_URL is not set. Notification worker is disabled.');
+}
 
-export const notificationWorker = new Worker<NotificationJobPayload>('notification.queue', async (job) => {
+const connection = env.REDIS_URL
+    ? new Redis(env.REDIS_URL, { maxRetriesPerRequest: null })
+    : null;
+
+export const notificationWorker = connection
+    ? new Worker<NotificationJobPayload>('notification.queue', async (job) => {
     console.log(`Job ${job.id} started. Notification: ${job.data.notificationId}`); // LOG START
     const { notificationId } = job.data;
 
@@ -96,8 +103,11 @@ export const notificationWorker = new Worker<NotificationJobPayload>('notificati
 }, {
     connection,
     concurrency: 5 // Process 5 jobs in parallel
-});
+})
+    : null;
 
-notificationWorker.on('failed', (job, err) => {
-    console.error(`Job ${job?.id} has failed with ${err.message}`);
-});
+if (notificationWorker) {
+    notificationWorker.on('failed', (job, err) => {
+        console.error(`Job ${job?.id} has failed with ${err.message}`);
+    });
+}

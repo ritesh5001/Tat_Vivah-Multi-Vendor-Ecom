@@ -34,10 +34,10 @@ const sellerLinks = [
 ];
 
 const adminLinks = [
-  { href: "/admin/Dashboard", label: "Overview" },
+  { href: "/admin/dashboard", label: "Overview" },
   { href: "/admin/sellers", label: "Sellers" },
+  { href: "/admin/products", label: "Products" },
   { href: "/admin/reviews", label: "Reviews" },
-  { href: "/admin/approvals", label: "Approvals" },
   { href: "/admin/security", label: "Security" },
   { href: "/admin/profile", label: "Profile" },
 ];
