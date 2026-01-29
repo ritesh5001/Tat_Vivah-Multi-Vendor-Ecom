@@ -99,9 +99,9 @@ export class VariantRepository {
     /**
      * Check if SKU exists
      */
-    async skuExists(sku: string): Promise<boolean> {
-        const variant = await prisma.productVariant.findUnique({
-            where: { sku },
+    async skuExists(productId: string, sku: string): Promise<boolean> {
+        const variant = await prisma.productVariant.findFirst({
+            where: { productId, sku },
             select: { id: true },
         });
         return variant !== null;

@@ -25,7 +25,18 @@ export class CheckoutService {
      * 3. Deduct stock and create movements
      * 4. Clear cart
      */
-    async checkout(userId: string): Promise<CheckoutResponse> {
+    async checkout(
+        userId: string,
+        shipping?: {
+            shippingName?: string;
+            shippingPhone?: string;
+            shippingEmail?: string;
+            shippingAddressLine1?: string;
+            shippingAddressLine2?: string;
+            shippingCity?: string;
+            shippingNotes?: string;
+        }
+    ): Promise<CheckoutResponse> {
         // 1. Get cart with all items and details
         const cart = await this.cartRepo.getCartWithDetails(userId);
         if (!cart || cart.items.length === 0) {
@@ -72,16 +83,25 @@ export class CheckoutService {
         }
 
         // 3. Calculate total amount
-        const totalAmount = itemsWithStock.reduce(
+        const subtotal = itemsWithStock.reduce(
             (sum, item) => sum + item.priceSnapshot * item.quantity,
             0
         );
+        const shippingFee = itemsWithStock.length > 0 ? 180 : 0;
+        const totalAmount = subtotal + shippingFee;
 
         // 4. Create order with items (single create with nested writes)
         const order = await prisma.order.create({
             data: {
                 userId,
                 totalAmount,
+                shippingName: shipping?.shippingName ?? null,
+                shippingPhone: shipping?.shippingPhone ?? null,
+                shippingEmail: shipping?.shippingEmail ?? null,
+                shippingAddressLine1: shipping?.shippingAddressLine1 ?? null,
+                shippingAddressLine2: shipping?.shippingAddressLine2 ?? null,
+                shippingCity: shipping?.shippingCity ?? null,
+                shippingNotes: shipping?.shippingNotes ?? null,
                 status: 'PLACED',
                 items: {
                     create: itemsWithStock.map((item) => ({

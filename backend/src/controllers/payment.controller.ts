@@ -17,6 +17,23 @@ export class PaymentController {
         });
     });
 
+    verifyPayment = asyncHandler(async (req: Request, res: Response) => {
+        const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+        const userId = (req as any).user.userId;
+
+        const result = await paymentService.verifyRazorpayPayment(
+            userId,
+            razorpayOrderId,
+            razorpayPaymentId,
+            razorpaySignature
+        );
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    });
+
     getPaymentDetails = asyncHandler(async (req: Request, res: Response) => {
         const { orderId } = req.params;
         const userId = (req as any).user.userId;

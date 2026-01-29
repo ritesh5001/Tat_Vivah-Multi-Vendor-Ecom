@@ -477,7 +477,9 @@ export default function SellerProductsPage() {
             filteredProducts.map((product: any) => (
               <Card
                 key={product.id}
-                className="border border-indigo-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70"
+                className={`border border-indigo-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 ${
+                  product.deletedByAdmin ? "opacity-70" : ""
+                }`}
               >
                 <CardHeader className="flex-row items-center justify-between">
                   <div>
@@ -487,6 +489,11 @@ export default function SellerProductsPage() {
                     <p className="text-sm text-slate-500 dark:text-slate-300">
                       {product.category?.name ?? "Uncategorized"}
                     </p>
+                    {product.deletedByAdmin ? (
+                      <p className="mt-2 text-xs font-semibold text-rose-600">
+                        Deleted by admin{product.deletedByAdminReason ? ` · ${product.deletedByAdminReason}` : ""}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -497,6 +504,7 @@ export default function SellerProductsPage() {
                           ? setEditingProductId(null)
                           : handleEditProduct(product)
                       }
+                      disabled={product.deletedByAdmin}
                     >
                       {editingProductId === product.id ? "Close" : "Edit"}
                     </Button>
@@ -504,6 +512,7 @@ export default function SellerProductsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(product.id)}
+                      disabled={product.deletedByAdmin}
                     >
                       Delete
                     </Button>
@@ -540,6 +549,7 @@ export default function SellerProductsPage() {
                                 categoryId: event.target.value,
                               }))
                             }
+                            disabled={product.deletedByAdmin}
                           >
                             <option value="">Select category</option>
                             {categories.map((category) => (
@@ -559,6 +569,7 @@ export default function SellerProductsPage() {
                                 title: event.target.value,
                               }))
                             }
+                            disabled={product.deletedByAdmin}
                           />
                         </div>
                       </div>
@@ -572,6 +583,7 @@ export default function SellerProductsPage() {
                               description: event.target.value,
                             }))
                           }
+                          disabled={product.deletedByAdmin}
                         />
                       </div>
                       <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
@@ -584,10 +596,15 @@ export default function SellerProductsPage() {
                               isPublished: event.target.checked,
                             }))
                           }
+                          disabled={product.deletedByAdmin}
                         />
                         Published
                       </label>
-                      <Button className="w-full sm:w-auto" onClick={handleSaveProduct}>
+                      <Button
+                        className="w-full sm:w-auto"
+                        onClick={handleSaveProduct}
+                        disabled={product.deletedByAdmin}
+                      >
                         Save changes
                       </Button>
                     </div>
@@ -615,7 +632,11 @@ export default function SellerProductsPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleVariantEditToggle(variant)}
+                                onClick={() => {
+                                  if (product.deletedByAdmin) return;
+                                  handleVariantEditToggle(variant);
+                                }}
+                                disabled={product.deletedByAdmin}
                               >
                                 {variantEditsOpen[variant.id] ? "Close" : "Edit"}
                               </Button>
@@ -640,6 +661,7 @@ export default function SellerProductsPage() {
                                       }))
                                     }
                                     placeholder="Price"
+                                    disabled={product.deletedByAdmin}
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -659,6 +681,7 @@ export default function SellerProductsPage() {
                                       }))
                                     }
                                     placeholder="Compare at"
+                                    disabled={product.deletedByAdmin}
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -675,17 +698,23 @@ export default function SellerProductsPage() {
                                       }))
                                     }
                                     placeholder="Stock"
+                                    disabled={product.deletedByAdmin}
                                   />
                                 </div>
                               </div>
                               <div className="flex flex-wrap gap-2">
-                                <Button size="sm" onClick={() => handleVariantUpdate(variant.id)}>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleVariantUpdate(variant.id)}
+                                  disabled={product.deletedByAdmin}
+                                >
                                   Save pricing
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleStockChange(variant.id)}
+                                  disabled={product.deletedByAdmin}
                                 >
                                   Update stock
                                 </Button>
@@ -712,6 +741,7 @@ export default function SellerProductsPage() {
                             prev === product.id ? null : product.id
                           )
                         }
+                        disabled={product.deletedByAdmin}
                       >
                         {activeProductId === product.id ? "Close" : "Open"}
                       </Button>
@@ -727,6 +757,7 @@ export default function SellerProductsPage() {
                               sku: event.target.value,
                             }))
                           }
+                          disabled={product.deletedByAdmin}
                         />
                         <Input
                           placeholder="Price"
@@ -737,6 +768,7 @@ export default function SellerProductsPage() {
                               price: event.target.value,
                             }))
                           }
+                          disabled={product.deletedByAdmin}
                         />
                         <Input
                           placeholder="Compare at"
@@ -747,6 +779,7 @@ export default function SellerProductsPage() {
                               compareAtPrice: event.target.value,
                             }))
                           }
+                          disabled={product.deletedByAdmin}
                         />
                         <Input
                           placeholder="Initial stock"
@@ -757,10 +790,12 @@ export default function SellerProductsPage() {
                               initialStock: event.target.value,
                             }))
                           }
+                          disabled={product.deletedByAdmin}
                         />
                         <Button
                           className="sm:col-span-2"
                           onClick={() => handleAddVariant(product.id)}
+                          disabled={product.deletedByAdmin}
                         >
                           Save variant
                         </Button>

@@ -144,7 +144,7 @@ model Product {
 model ProductVariant {
   id             String     @id @default(cuid())
   productId      String     @map("product_id")
-  sku            String     @unique
+  sku            String
   price          Float
   compareAtPrice Float?     @map("compare_at_price")
   createdAt      DateTime   @default(now()) @map("created_at")
@@ -152,6 +152,7 @@ model ProductVariant {
   inventory      Inventory?
   product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@unique([productId, sku])
   @@index([productId])
   @@map("product_variants")
 }
@@ -198,6 +199,13 @@ model Order {
   userId      String              @map("user_id")
   status      OrderStatus         @default(PLACED)
   totalAmount Float               @map("total_amount")
+  shippingName String?             @map("shipping_name")
+  shippingPhone String?            @map("shipping_phone")
+  shippingEmail String?            @map("shipping_email")
+  shippingAddressLine1 String?     @map("shipping_address_line_1")
+  shippingAddressLine2 String?     @map("shipping_address_line_2")
+  shippingCity String?             @map("shipping_city")
+  shippingNotes String?            @map("shipping_notes")
   createdAt   DateTime            @default(now()) @map("created_at")
   movements   InventoryMovement[]
   items       OrderItem[]

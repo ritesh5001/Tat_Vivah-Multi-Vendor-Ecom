@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
 
   if (isAuthPage && accessToken && role && !forceLogin) {
     const roleRedirects: Record<string, string> = {
-      ADMIN: "/admin/Dashboard",
+      ADMIN: "/admin/dashboard",
       SELLER: "/seller/dashboard",
       USER: "/user/dashboard",
     };
