@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductImageCarouselProps {
   images: string[];
@@ -33,77 +34,97 @@ export default function ProductImageCarousel({
     [safeImages.length]
   );
 
-  const visibleThumbs = safeImages.slice(0, 3);
+  const visibleThumbs = safeImages.slice(0, 4);
   const remainingCount = Math.max(safeImages.length - 4, 0);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-white/90 shadow-lg shadow-rose-100/30 dark:border-rose-500/20 dark:bg-slate-900/70">
-        <img
-          src={safeImages[activeIndex]}
-          alt={title ?? "Product image"}
-          className="aspect-[4/3] w-full bg-white object-contain p-6 dark:bg-slate-950"
-          loading="lazy"
-        />
-        <button
-          type="button"
-          onClick={() => goTo(activeIndex - 1)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-white/90 px-3 py-2 text-base font-semibold text-slate-700 shadow-md transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
-          aria-label="Previous image"
-        >
-          ←
-        </button>
-        <button
-          type="button"
-          onClick={() => goTo(activeIndex + 1)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-white/90 px-3 py-2 text-base font-semibold text-slate-700 shadow-md transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
-          aria-label="Next image"
-        >
-          →
-        </button>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+      className="flex flex-col gap-6"
+    >
+      {/* Main Image - Gallery Frame Treatment */}
+      <div className="relative bg-cream dark:bg-card p-6 sm:p-10 lg:p-12">
+        {/* Subtle inner frame */}
+        <div className="relative border border-border-soft bg-card overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={activeIndex}
+              src={safeImages[activeIndex]}
+              alt={title ?? "Product image"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="aspect-[4/5] w-full bg-card object-contain p-8 sm:p-12"
+              loading="lazy"
+            />
+          </AnimatePresence>
+
+          {/* Navigation - Minimal */}
+          {safeImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => goTo(activeIndex - 1)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-border-soft bg-card/90 text-muted-foreground transition-all duration-300 hover:bg-card hover:text-foreground"
+                aria-label="Previous image"
+              >
+                <span className="text-sm">←</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo(activeIndex + 1)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-border-soft bg-card/90 text-muted-foreground transition-all duration-300 hover:bg-card hover:text-foreground"
+                aria-label="Next image"
+              >
+                <span className="text-sm">→</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        {visibleThumbs.map((image, index) => {
-          const isActive = index === activeIndex;
-          const isLastThumb = index === visibleThumbs.length - 1;
-          const showMore = remainingCount > 0 && isLastThumb;
-          return (
-            <button
-              key={`${image}-${index}`}
-              type="button"
-              onClick={() => goTo(index)}
-              className={`group relative overflow-hidden rounded-2xl border bg-white/80 dark:bg-slate-900/70 ${
-                isActive
-                  ? "border-rose-400 ring-2 ring-rose-200"
-                  : "border-rose-100 hover:border-rose-300 dark:border-rose-500/20"
-              }`}
-              aria-label={`View image ${index + 1}`}
-            >
-              <img
-                src={image}
-                alt={title ?? "Product thumbnail"}
-                className="aspect-square w-full object-contain p-2"
-                loading="lazy"
-              />
-              {showMore ? (
-                <div className="absolute inset-0 grid place-items-center bg-slate-900/70 text-sm font-semibold text-white">
-                  +{remainingCount}
-                </div>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+      {/* Thumbnail Strip - Smaller, Minimal */}
+      {safeImages.length > 1 && (
+        <div className="flex items-center gap-3 px-6 sm:px-10 lg:px-12">
+          {visibleThumbs.map((image, index) => {
+            const isActive = index === activeIndex;
+            const isLastThumb = index === visibleThumbs.length - 1;
+            const showMore = remainingCount > 0 && isLastThumb;
+            return (
+              <button
+                key={`${image}-${index}`}
+                type="button"
+                onClick={() => goTo(index)}
+                className={`group relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden transition-all duration-300 ${isActive
+                    ? "border-2 border-gold"
+                    : "border border-border-soft hover:border-gold/50"
+                  }`}
+                aria-label={`View image ${index + 1}`}
+              >
+                <img
+                  src={image}
+                  alt={title ?? "Product thumbnail"}
+                  className="h-full w-full object-contain p-1 bg-card"
+                  loading="lazy"
+                />
+                {showMore ? (
+                  <div className="absolute inset-0 grid place-items-center bg-charcoal/70 text-xs font-medium text-ivory">
+                    +{remainingCount}
+                  </div>
+                ) : null}
+              </button>
+            );
+          })}
 
-      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span>
-          Image {activeIndex + 1} of {safeImages.length}
-        </span>
-        <span className="rounded-full border border-rose-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-500 dark:border-rose-500/30">
-          Premium gallery
-        </span>
-      </div>
-    </div>
+          {/* Image Counter */}
+          <div className="ml-auto text-[11px] text-muted-foreground uppercase tracking-wider">
+            {activeIndex + 1} / {safeImages.length}
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }

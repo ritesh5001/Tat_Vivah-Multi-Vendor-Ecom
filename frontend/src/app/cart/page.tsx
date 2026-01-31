@@ -3,8 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCart, removeCartItem, updateCartItem } from "@/services/cart";
 import { toast } from "sonner";
 
@@ -69,117 +69,219 @@ export default function CartPage() {
   const total = subtotal + shipping;
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
-            Your cart
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-5xl flex-col gap-16 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Your Selection
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Review selected items
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Review Your Pieces
           </h1>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Each piece has been carefully selected. Take a moment to review before proceeding.
+          </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Items
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {loading ? (
-                <p className="text-sm text-slate-500">Loading cart...</p>
-              ) : items.length === 0 ? (
-                <p className="text-sm text-slate-500">
-                  Your cart is empty. Start shopping.
-                </p>
-              ) : (
-                items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300"
-                  >
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-white">
-                          {item.product?.title ?? "Item"}
-                        </p>
-                        <p className="text-xs">SKU · {item.variant?.sku ?? "—"}</p>
-                      </div>
-                      <p className="text-base font-semibold text-rose-600">
-                        {currency.format(item.priceSnapshot)}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleQuantity(item.id, item.quantity - 1)}
-                        >
-                          -
-                        </Button>
-                        <span className="min-w-[2rem] text-center font-semibold">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleQuantity(item.id, item.quantity + 1)}
-                        >
-                          +
-                        </Button>
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRemove(item.id)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
+        {/* Content */}
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_0.6fr] lg:gap-16">
+          {/* Cart Items */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-border-soft pb-4">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Selected Items ({items.length})
+              </p>
+            </div>
 
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
-              <div className="flex items-center justify-between">
-                <span>Subtotal</span>
-                <span>{currency.format(subtotal)}</span>
+            {loading ? (
+              <div className="py-16 text-center">
+                <p className="text-sm text-muted-foreground">Loading your selection...</p>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Shipping</span>
-                <span>{items.length > 0 ? currency.format(shipping) : "₹0"}</span>
-              </div>
-              <div className="flex items-center justify-between font-semibold text-slate-900 dark:text-white">
-                <span>Total</span>
-                <span>{currency.format(total)}</span>
-              </div>
-              <Button size="lg" className="w-full" onClick={() => router.push("/checkout")}>
-                Proceed to checkout
-              </Button>
-              <Link
-                href="/marketplace"
-                className="text-center text-sm font-semibold text-rose-600 hover:text-rose-500"
+            ) : items.length === 0 ? (
+              /* Empty State - Inviting */
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="py-20 text-center space-y-6 border border-border-soft bg-cream/50 dark:bg-card/50"
               >
-                Continue shopping
-              </Link>
-            </CardContent>
-          </Card>
+                <div className="space-y-4">
+                  <p className="font-serif text-2xl font-light text-foreground">
+                    Your collection awaits
+                  </p>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                    Discover handcrafted pieces that tell a story of heritage and craftsmanship.
+                    Each item is curated from India's finest artisans.
+                  </p>
+                </div>
+                <Link
+                  href="/marketplace"
+                  className="inline-flex h-12 items-center justify-center bg-charcoal px-8 text-xs font-medium uppercase tracking-[0.15em] text-ivory transition-all duration-400 hover:bg-brown dark:bg-gold dark:text-charcoal dark:hover:bg-gold-muted"
+                >
+                  Explore Collection
+                </Link>
+              </motion.div>
+            ) : (
+              <div className="space-y-4">
+                {items.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.08, duration: 0.5 }}
+                    className="group border border-border-soft bg-card p-6 transition-all duration-300 hover:border-gold/30"
+                  >
+                    <div className="flex gap-6">
+                      {/* Product Image - Gallery Frame */}
+                      <div className="w-24 h-28 sm:w-32 sm:h-36 flex-shrink-0 bg-cream dark:bg-brown/20 p-2 border border-border-soft">
+                        <div className="w-full h-full bg-card flex items-center justify-center">
+                          <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">
+                            Image
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Product Details */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gold">
+                            {item.product?.category?.name ?? "Curated"}
+                          </p>
+                          <h3 className="font-serif text-lg font-normal text-foreground">
+                            {item.product?.title ?? "Item"}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            Variant · {item.variant?.sku ?? "—"}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
+                          {/* Quantity Controls - Handcrafted Feel */}
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantity(item.id, item.quantity - 1)}
+                              className="w-9 h-9 flex items-center justify-center border border-border-soft text-muted-foreground transition-all duration-300 hover:border-gold/50 hover:text-foreground"
+                            >
+                              −
+                            </button>
+                            <span className="w-12 text-center text-sm font-medium text-foreground">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantity(item.id, item.quantity + 1)}
+                              className="w-9 h-9 flex items-center justify-center border border-border-soft text-muted-foreground transition-all duration-300 hover:border-gold/50 hover:text-foreground"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          {/* Remove */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemove(item.id)}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-300"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="text-right">
+                        <p className="font-serif text-lg font-light text-foreground">
+                          {currency.format(item.priceSnapshot)}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Summary - Tailor's Receipt */}
+          <div className="lg:sticky lg:top-24">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="border border-border-soft bg-card p-8 space-y-8"
+            >
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                  Order Summary
+                </p>
+                <div className="h-px bg-border-soft" />
+              </div>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Subtotal</span>
+                  <span>{currency.format(subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Shipping</span>
+                  <span>{items.length > 0 ? currency.format(shipping) : "—"}</span>
+                </div>
+                <div className="h-px bg-border-soft" />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium uppercase tracking-wider text-foreground">
+                    Total
+                  </span>
+                  <span className="font-serif text-2xl font-light text-foreground">
+                    {currency.format(total)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                >
+                  <Button
+                    size="lg"
+                    className="w-full h-14"
+                    onClick={() => router.push("/checkout")}
+                    disabled={items.length === 0}
+                  >
+                    Proceed to Checkout
+                  </Button>
+                </motion.div>
+
+                <Link
+                  href="/marketplace"
+                  className="block text-center text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors duration-300"
+                >
+                  Continue Exploring
+                </Link>
+              </div>
+
+              {/* Trust Signal */}
+              <div className="pt-4 border-t border-border-soft">
+                <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1 w-1 rounded-full bg-gold" />
+                    Secure Checkout
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1 w-1 rounded-full bg-gold" />
+                    Easy Returns
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

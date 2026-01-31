@@ -1,10 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { approveSeller, getSellers, suspendSeller } from "@/services/admin";
 import { toast } from "sonner";
+
+const getStatusStyle = (status: string) => {
+  switch (status.toUpperCase()) {
+    case "ACTIVE":
+      return "border-[#7B9971]/30 text-[#5A7352] bg-[#7B9971]/5";
+    case "PENDING":
+      return "border-[#B8956C]/30 text-[#8A7054] bg-[#B8956C]/5";
+    case "SUSPENDED":
+      return "border-[#A67575]/30 text-[#7A5656] bg-[#A67575]/5";
+    default:
+      return "border-border-soft text-muted-foreground bg-cream/30";
+  }
+};
 
 export default function AdminSellersPage() {
   const [loading, setLoading] = React.useState(true);
@@ -53,57 +66,103 @@ export default function AdminSellersPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-500">
-            Seller approvals
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Vendor Management
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Approve or suspend sellers.
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Seller Approvals
           </h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Review and moderate seller accounts with deliberate authority.
+          </p>
         </div>
 
-        <Card className="border border-emerald-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-          <CardHeader>
-            <CardTitle className="text-lg text-slate-900 dark:text-white">
-              Sellers table
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
+        {/* Sellers Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+          className="border border-border-soft bg-card"
+        >
+          <div className="border-b border-border-soft p-6">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+              Registry
+            </p>
+            <p className="font-serif text-lg font-light text-foreground">
+              Verified Sellers
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
             {loading ? (
-              <p className="text-sm text-slate-500">Loading sellers...</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">Loading sellers...</p>
+              </div>
             ) : sellers.length === 0 ? (
-              <p className="text-sm text-slate-500">No sellers found.</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">No sellers found.</p>
+              </div>
             ) : (
-              <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-                <thead className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  <tr>
-                    <th className="py-3">Seller</th>
-                    <th className="py-3">Status</th>
-                    <th className="py-3">Joined</th>
-                    <th className="py-3">Action</th>
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border-soft">
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Seller
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Joined
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Action
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800">
-                  {sellers.map((seller) => (
-                    <tr key={seller.id}>
-                      <td className="py-3 font-semibold text-slate-900 dark:text-white">
+                <tbody className="divide-y divide-border-soft">
+                  {sellers.map((seller, index) => (
+                    <motion.tr
+                      key={seller.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 + index * 0.03, duration: 0.3 }}
+                      className="hover:bg-cream/30 dark:hover:bg-brown/10 transition-colors duration-200"
+                    >
+                      <td className="p-6 font-medium text-foreground">
                         {seller.email ?? seller.phone ?? seller.id?.slice(0, 8)}
                       </td>
-                      <td className="py-3">{seller.status}</td>
-                      <td className="py-3">
+                      <td className="p-6">
+                        <span className={`px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider border ${getStatusStyle(seller.status)}`}>
+                          {seller.status}
+                        </span>
+                      </td>
+                      <td className="p-6 text-muted-foreground">
                         {seller.createdAt
-                          ? new Date(seller.createdAt).toLocaleDateString()
+                          ? new Date(seller.createdAt).toLocaleDateString("en-IN", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
                           : "—"}
                       </td>
-                      <td className="py-3">
+                      <td className="p-6">
                         <div className="flex flex-wrap gap-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleApprove(seller.id)}
                             disabled={seller.status === "ACTIVE"}
+                            className="h-9"
                           >
                             {seller.status === "ACTIVE" ? "Approved" : "Approve"}
                           </Button>
@@ -112,19 +171,20 @@ export default function AdminSellersPage() {
                             variant="outline"
                             onClick={() => handleSuspend(seller.id)}
                             disabled={seller.status === "SUSPENDED"}
+                            className="h-9 text-muted-foreground hover:text-[#7A5656] hover:border-[#A67575]/40"
                           >
                             {seller.status === "SUSPENDED" ? "Suspended" : "Suspend"}
                           </Button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

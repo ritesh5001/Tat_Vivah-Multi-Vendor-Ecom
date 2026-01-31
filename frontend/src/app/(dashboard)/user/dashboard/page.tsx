@@ -2,17 +2,33 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listBuyerOrders } from "@/services/orders";
 import { toast } from "sonner";
 
 const quickLinks = [
-  { label: "Browse marketplace", href: "/marketplace" },
-  { label: "Saved vendors", href: "/vendors" },
-  { label: "My orders", href: "/user/orders" },
-  { label: "My profile", href: "/user/profile" },
+  { label: "Browse Marketplace", href: "/marketplace", description: "Discover curated collections" },
+  { label: "Saved Vendors", href: "/vendors", description: "Your trusted artisans" },
+  { label: "My Orders", href: "/user/orders", description: "Track your journey" },
+  { label: "My Profile", href: "/user/profile", description: "Account details" },
 ];
+
+const getStatusStyle = (status: string) => {
+  // Calm, desaturated status colors - never loud
+  switch (status.toUpperCase()) {
+    case "DELIVERED":
+      return "border-[#7B9971]/30 text-[#5A7352] bg-[#7B9971]/5";
+    case "CONFIRMED":
+      return "border-[#B8956C]/30 text-[#8A7054] bg-[#B8956C]/5";
+    case "SHIPPED":
+      return "border-[#8B9CB8]/30 text-[#5E6B82] bg-[#8B9CB8]/5";
+    case "CANCELLED":
+      return "border-[#A67575]/30 text-[#7A5656] bg-[#A67575]/5";
+    default:
+      return "border-border-soft text-muted-foreground bg-cream/30";
+  }
+};
 
 export default function UserDashboardPage() {
   const [user, setUser] = React.useState<{
@@ -56,81 +72,176 @@ export default function UserDashboardPage() {
   const displayName = user?.email ?? user?.phone ?? "Customer";
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
-            User dashboard
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:py-20"
+      >
+        {/* Welcome Header */}
+        <div className="space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Personal Account
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
             Welcome, {displayName}
           </h1>
-          <p className="max-w-2xl text-base text-slate-600 dark:text-slate-300">
-            Track your orders, manage saved items, and discover new collections.
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Track your orders, manage saved items, and discover new collections from trusted artisans.
           </p>
         </div>
 
-        <section className="grid gap-6 sm:grid-cols-3">
-          {quickLinks.map((link) => (
-            <Link
+        {/* Quick Links - Gentle Invitations */}
+        <section className="grid gap-px bg-border-soft sm:grid-cols-2 lg:grid-cols-4">
+          {quickLinks.map((link, index) => (
+            <motion.div
               key={link.href}
-              href={link.href}
-              className="rounded-2xl border border-rose-100 bg-white/80 px-4 py-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-1 hover:border-rose-200 hover:text-rose-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05, duration: 0.5 }}
             >
-              {link.label}
-            </Link>
+              <Link href={link.href}>
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="bg-card p-6 space-y-2 h-full transition-all duration-300 hover:bg-cream/50 dark:hover:bg-brown/20"
+                >
+                  <p className="text-sm font-medium text-foreground">
+                    {link.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {link.description}
+                  </p>
+                </motion.div>
+              </Link>
+            </motion.div>
           ))}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Recent orders
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Main Content Grid */}
+        <section className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+          {/* Recent Orders - Personal Timeline */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="border border-border-soft bg-card"
+          >
+            <div className="border-b border-border-soft p-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                Your Journey
+              </p>
+              <p className="font-serif text-lg font-light text-foreground">
+                Recent Orders
+              </p>
+            </div>
+
+            <div className="divide-y divide-border-soft">
               {orders.length === 0 ? (
-                <p className="text-sm text-slate-500">No recent orders yet.</p>
+                <div className="p-8 text-center space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Your order history will appear here.
+                  </p>
+                  <Link href="/marketplace">
+                    <Button variant="outline" size="sm">
+                      Explore Collections
+                    </Button>
+                  </Link>
+                </div>
               ) : (
-                orders.map((order) => (
-                  <div
+                orders.map((order, index) => (
+                  <motion.div
                     key={order.id}
-                    className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 + index * 0.05, duration: 0.4 }}
+                    className="flex items-center justify-between gap-4 p-6"
                   >
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">
                         {order.item}
                       </p>
-                      <p className="text-xs">{order.id}</p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {order.id}
+                      </p>
                     </div>
-                    <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600 dark:bg-rose-500/20 dark:text-rose-200">
+                    <span className={`px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider border ${getStatusStyle(order.status)}`}>
                       {order.status}
                     </span>
-                  </div>
+                  </motion.div>
                 ))
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
 
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Quick actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full">
-                Track order
-              </Button>
-              <Button variant="outline" className="w-full">
-                Request support
-              </Button>
-              <Button className="w-full">Shop now</Button>
-            </CardContent>
-          </Card>
+          {/* Quick Actions - Confident Not Pushy */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="border border-border-soft bg-card h-fit"
+          >
+            <div className="border-b border-border-soft p-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                At Your Service
+              </p>
+              <p className="font-serif text-lg font-light text-foreground">
+                Quick Actions
+              </p>
+            </div>
+
+            <div className="p-6 space-y-3">
+              <Link href="/user/orders">
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="flex items-center justify-between py-3 px-4 border border-border-soft text-sm text-foreground transition-all duration-300 hover:border-gold/50 hover:bg-cream/50 dark:hover:bg-brown/20"
+                >
+                  <span>Track Order</span>
+                  <span className="text-muted-foreground">→</span>
+                </motion.div>
+              </Link>
+              <motion.div
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="flex items-center justify-between py-3 px-4 border border-border-soft text-sm text-foreground cursor-pointer transition-all duration-300 hover:border-gold/50 hover:bg-cream/50 dark:hover:bg-brown/20"
+              >
+                <span>Request Support</span>
+                <span className="text-muted-foreground">→</span>
+              </motion.div>
+              <Link href="/marketplace">
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <Button className="w-full h-12">
+                    Continue Shopping
+                  </Button>
+                </motion.div>
+              </Link>
+            </div>
+          </motion.div>
         </section>
-      </div>
+
+        {/* Trust Footer */}
+        <section className="border-t border-border-soft pt-8">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Verified Artisans
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Secure Payments
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Buyer Protection
+            </span>
+          </div>
+        </section>
+      </motion.div>
     </div>
   );
 }

@@ -1,16 +1,17 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listSellerOrders } from "@/services/orders";
 import { toast } from "sonner";
 
 const stats = [
-  { label: "New inquiries", value: "92" },
-  { label: "Active orders", value: "64" },
-  { label: "Monthly revenue", value: "₹12.4L" },
-  { label: "Rating", value: "4.8" },
+  { label: "New Inquiries", value: "92", description: "This month" },
+  { label: "Active Orders", value: "64", description: "In progress" },
+  { label: "Monthly Revenue", value: "₹12.4L", description: "Current period" },
+  { label: "Seller Rating", value: "4.8", description: "Verified reviews" },
 ];
 
 export default function SellerDashboardPage() {
@@ -27,10 +28,10 @@ export default function SellerDashboardPage() {
           customer: item.productTitle ?? "Order item",
           date: item.order?.createdAt
             ? new Date(item.order.createdAt).toLocaleDateString("en-IN", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
             : "—",
           status: item.order?.status ?? "PLACED",
         }));
@@ -45,91 +46,164 @@ export default function SellerDashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-indigo-50 via-white to-rose-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
-            Seller console
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Seller Console
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Manage your multi-vendor business.
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Business Overview
           </h1>
-          <p className="max-w-2xl text-base text-slate-600 dark:text-slate-300">
-            Track apparel orders, manage inventory, and keep performance high
-            across every listing.
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Track orders, manage inventory, and maintain performance across your fashion listings.
           </p>
         </div>
 
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Card
+        {/* Stats Grid - Business Insights */}
+        <section className="grid gap-px bg-border-soft sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, index) => (
+            <motion.div
               key={stat.label}
-              className="border border-indigo-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05, duration: 0.5 }}
+              className="bg-card p-6 lg:p-8 space-y-4"
             >
-              <CardContent className="space-y-2 p-6">
-                <p className="text-xs uppercase tracking-[0.2em] text-indigo-500">
-                  {stat.label}
-                </p>
-                <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gold">
+                {stat.label}
+              </p>
+              <div className="space-y-1">
+                <p className="font-serif text-3xl font-light text-foreground">
                   {stat.value}
                 </p>
-              </CardContent>
-            </Card>
+                <p className="text-[11px] text-muted-foreground">
+                  {stat.description}
+                </p>
+              </div>
+            </motion.div>
           ))}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <Card className="border border-indigo-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 lg:col-span-2">
-            <CardHeader className="flex-row items-center justify-between">
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Recent orders
-              </CardTitle>
-              <Button variant="outline" size="sm">
-                View all
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Main Content */}
+        <section className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+          {/* Recent Orders */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="border border-border-soft bg-card"
+          >
+            <div className="flex items-center justify-between border-b border-border-soft p-6">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                  Recent Orders
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Latest customer orders requiring attention
+                </p>
+              </div>
+              <Link href="/seller/orders">
+                <Button variant="outline" size="sm">
+                  View All
+                </Button>
+              </Link>
+            </div>
+
+            <div className="divide-y divide-border-soft">
               {orders.length === 0 ? (
-                <p className="text-sm text-slate-500">No recent orders yet.</p>
+                <div className="p-8 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No recent orders yet.
+                  </p>
+                </div>
               ) : (
-                orders.map((order) => (
-                  <div
+                orders.map((order, index) => (
+                  <motion.div
                     key={order.id}
-                    className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 + index * 0.05, duration: 0.4 }}
+                    className="flex items-center justify-between gap-4 p-6"
                   >
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">
                         {order.customer}
                       </p>
-                      <p className="text-xs">{order.date}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {order.date}
+                      </p>
                     </div>
-                    <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-200">
+                    <span className="px-3 py-1 text-[10px] font-medium uppercase tracking-wider border border-border-soft text-muted-foreground">
                       {order.status}
                     </span>
-                  </div>
+                  </motion.div>
                 ))
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
 
-          <Card className="border border-indigo-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Quick actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {["Add new listing", "Update pricing", "Schedule review"].map(
-                (item) => (
-                  <Button key={item} variant="outline" className="w-full">
-                    {item}
-                  </Button>
-                )
-              )}
-            </CardContent>
-          </Card>
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="border border-border-soft bg-card h-fit"
+          >
+            <div className="border-b border-border-soft p-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                Quick Actions
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Common seller operations
+              </p>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {[
+                { label: "Add New Listing", href: "/seller/products" },
+                { label: "Manage Orders", href: "/seller/orders" },
+                { label: "Update Profile", href: "/seller/profile" },
+              ].map((action) => (
+                <Link key={action.label} href={action.href}>
+                  <motion.div
+                    whileHover={{ x: 4 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="flex items-center justify-between py-3 px-4 border border-border-soft text-sm text-foreground transition-all duration-300 hover:border-gold/50 hover:bg-cream/50 dark:hover:bg-brown/20"
+                  >
+                    <span>{action.label}</span>
+                    <span className="text-muted-foreground">→</span>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
         </section>
-      </div>
+
+        {/* Trust Footer */}
+        <section className="border-t border-border-soft pt-8">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Seller Protection
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Secure Payouts
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Dedicated Support
+            </span>
+          </div>
+        </section>
+      </motion.div>
     </div>
   );
 }

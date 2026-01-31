@@ -1,24 +1,36 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalLoader } from "@/components/global-loader";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/**
+ * Inter - Body text, UI elements
+ * Clean, modern, highly legible
+ */
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/**
+ * Cormorant Garamond - Display headings
+ * Elegant, editorial, luxury feel
+ */
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "TatVivahh",
-  description: "TatVivah authentication experiences",
+  title: "TatVivah | Premium Indian Fashion",
+  description: "Discover curated men's ethnic wear and wedding fashion from verified sellers. A trusted multi-vendor marketplace for premium Indian clothing.",
+  keywords: ["Indian fashion", "ethnic wear", "wedding fashion", "men's clothing", "kurta", "sherwani"],
 };
 
 export default function RootLayout({
@@ -34,7 +46,7 @@ export default function RootLayout({
             __html: `(() => {
   try {
     const stored = localStorage.getItem('tatvivah-theme');
-            const theme = stored ?? 'light';
+    const theme = stored ?? 'light';
     if (theme === 'dark') document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
     document.documentElement.style.colorScheme = theme;
@@ -44,14 +56,13 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-slate-50 text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-white`}
+        className={`${inter.variable} ${cormorant.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <SiteHeader />
         <GlobalLoader />
-        <Toaster richColors />
+        <Toaster />
         <main className="min-h-[calc(100vh-160px)]">{children}</main>
         <SiteFooter />
-        
       </body>
     </html>
   );

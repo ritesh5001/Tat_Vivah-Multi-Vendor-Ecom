@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { checkout, getCart } from "@/services/cart";
@@ -130,7 +130,7 @@ export default function CheckoutPage() {
             router.push("/user/orders");
           },
         },
-        theme: { color: "#e11d48" },
+        theme: { color: "#B8956C" },
       };
 
       const razorpay = new (window as any).Razorpay(options);
@@ -143,178 +143,271 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
-            Checkout
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-5xl flex-col gap-16 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Secure Checkout
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Confirm your order details
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Complete Your Order
           </h1>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Your pieces are reserved. Please provide delivery details to finalize your purchase.
+          </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Shipping details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="dark:text-slate-200">
-                    Full name
-                  </Label>
-                  <Input
-                    id="name"
-                    placeholder="Aarav Sharma"
-                    value={shipping.name}
-                    onChange={(event) =>
-                      setShipping((prev) => ({
-                        ...prev,
-                        name: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="dark:text-slate-200">
-                    Phone
-                  </Label>
-                  <Input
-                    id="phone"
-                    placeholder="+91 98765 43210"
-                    value={shipping.phone}
-                    onChange={(event) =>
-                      setShipping((prev) => ({
-                        ...prev,
-                        phone: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="dark:text-slate-200">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  placeholder="you@email.com"
-                  value={shipping.email}
-                  onChange={(event) =>
-                    setShipping((prev) => ({
-                      ...prev,
-                      email: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="dark:text-slate-200">
-                    Address line
-                  </Label>
-                  <Input
-                    id="address"
-                    placeholder="House no, street"
-                    value={shipping.addressLine1}
-                    onChange={(event) =>
-                      setShipping((prev) => ({
-                        ...prev,
-                        addressLine1: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="city" className="dark:text-slate-200">
-                    City
-                  </Label>
-                  <Input
-                    id="city"
-                    placeholder="Ahmedabad"
-                    value={shipping.city}
-                    onChange={(event) =>
-                      setShipping((prev) => ({
-                        ...prev,
-                        city: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address2" className="dark:text-slate-200">
-                  Address line 2
-                </Label>
-                <Input
-                  id="address2"
-                  placeholder="Apartment, landmark"
-                  value={shipping.addressLine2}
-                  onChange={(event) =>
-                    setShipping((prev) => ({
-                      ...prev,
-                      addressLine2: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="notes" className="dark:text-slate-200">
-                  Delivery notes
-                </Label>
-                <Input
-                  id="notes"
-                  placeholder="Preferred delivery timing"
-                  value={shipping.notes}
-                  onChange={(event) =>
-                    setShipping((prev) => ({
-                      ...prev,
-                      notes: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Payment summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
-              <div className="flex items-center justify-between">
-                <span>Subtotal</span>
-                <span>{currency.format(Math.max(cartTotal - 180, 0))}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Shipping</span>
-                <span>{hasItems ? "₹180" : "₹0"}</span>
-              </div>
-              <div className="flex items-center justify-between font-semibold text-slate-900 dark:text-white">
-                <span>Total</span>
-                <span>{currency.format(cartTotal)}</span>
-              </div>
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={handleCheckout}
-                disabled={!hasItems || loading || !razorpayReady}
-              >
-                {loading ? "Opening payment..." : "Pay & place order"}
-              </Button>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Payments are secured with TatVivah protection.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center gap-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center border-2 border-gold text-xs font-medium text-gold">
+              1
+            </span>
+            <span className="text-xs font-medium uppercase tracking-wider text-foreground">
+              Details
+            </span>
+          </div>
+          <div className="h-px w-12 bg-border-soft" />
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center border border-border-soft text-xs font-medium text-muted-foreground">
+              2
+            </span>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Payment
+            </span>
+          </div>
+          <div className="h-px w-12 bg-border-soft" />
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center border border-border-soft text-xs font-medium text-muted-foreground">
+              3
+            </span>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Confirm
+            </span>
+          </div>
         </div>
-      </div>
+
+        {/* Content */}
+        <div className="grid gap-12 lg:grid-cols-[1.3fr_0.7fr] lg:gap-16">
+          {/* Shipping Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.6 }}
+            className="space-y-8"
+          >
+            <div className="border border-border-soft bg-card p-8 space-y-8">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-gold mb-2">
+                  Delivery Address
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Where shall we send your pieces?
+                </p>
+              </div>
+
+              <div className="h-px bg-border-soft" />
+
+              <div className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Aarav Sharma"
+                      value={shipping.name}
+                      onChange={(event) =>
+                        setShipping((prev) => ({
+                          ...prev,
+                          name: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      placeholder="+91 98765 43210"
+                      value={shipping.phone}
+                      onChange={(event) =>
+                        setShipping((prev) => ({
+                          ...prev,
+                          phone: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    placeholder="you@email.com"
+                    value={shipping.email}
+                    onChange={(event) =>
+                      setShipping((prev) => ({
+                        ...prev,
+                        email: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="h-px bg-border-soft" />
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address Line 1</Label>
+                    <Input
+                      id="address"
+                      placeholder="House no, street"
+                      value={shipping.addressLine1}
+                      onChange={(event) =>
+                        setShipping((prev) => ({
+                          ...prev,
+                          addressLine1: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      placeholder="Ahmedabad"
+                      value={shipping.city}
+                      onChange={(event) =>
+                        setShipping((prev) => ({
+                          ...prev,
+                          city: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address2">Address Line 2</Label>
+                  <Input
+                    id="address2"
+                    placeholder="Apartment, landmark"
+                    value={shipping.addressLine2}
+                    onChange={(event) =>
+                      setShipping((prev) => ({
+                        ...prev,
+                        addressLine2: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Delivery Notes (Optional)</Label>
+                  <Input
+                    id="notes"
+                    placeholder="Preferred delivery timing, special instructions"
+                    value={shipping.notes}
+                    onChange={(event) =>
+                      setShipping((prev) => ({
+                        ...prev,
+                        notes: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Payment Summary */}
+          <div className="lg:sticky lg:top-24">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="border border-border-soft bg-card p-8 space-y-8"
+            >
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                  Payment Summary
+                </p>
+                <div className="h-px bg-border-soft" />
+              </div>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Subtotal</span>
+                  <span>{currency.format(Math.max(cartTotal - 180, 0))}</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Shipping</span>
+                  <span>{hasItems ? "₹180" : "—"}</span>
+                </div>
+                <div className="h-px bg-border-soft" />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium uppercase tracking-wider text-foreground">
+                    Total
+                  </span>
+                  <span className="font-serif text-2xl font-light text-foreground">
+                    {currency.format(cartTotal)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                >
+                  <Button
+                    size="lg"
+                    className="w-full h-14"
+                    onClick={handleCheckout}
+                    disabled={!hasItems || loading || !razorpayReady}
+                  >
+                    {loading ? "Processing..." : "Complete Purchase"}
+                  </Button>
+                </motion.div>
+
+                <p className="text-center text-[10px] text-muted-foreground leading-relaxed">
+                  By completing this purchase, you agree to our terms of service.
+                  Your payment is secured with industry-standard encryption.
+                </p>
+              </div>
+
+              {/* Trust Signals */}
+              <div className="pt-4 border-t border-border-soft space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-600/60" />
+                  <span className="text-xs text-muted-foreground">
+                    Secured by Razorpay
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+                  <span className="text-xs text-muted-foreground">
+                    TatVivah Buyer Protection
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+                  <span className="text-xs text-muted-foreground">
+                    7-Day Easy Returns
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

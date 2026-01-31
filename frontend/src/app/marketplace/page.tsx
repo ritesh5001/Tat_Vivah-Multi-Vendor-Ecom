@@ -13,7 +13,7 @@ type SearchParams = {
 
 async function fetchCategories() {
   if (!API_BASE_URL) {
-    return [] as Array<{ id: string; name: string }>; // fallback
+    return [] as Array<{ id: string; name: string }>;
   }
   const response = await fetch(`${API_BASE_URL}/v1/categories`, {
     next: { revalidate: 120 },
@@ -82,48 +82,53 @@ export default async function MarketplacePage({
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16">
-        <section className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6 py-20">
+        {/* Hero Section */}
+        <section className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-4 max-w-2xl">
+            <p className="text-xs font-medium uppercase tracking-[0.3em] text-gold">
               TatVivah Marketplace
             </p>
-            <h1 className="text-4xl font-semibold text-slate-900 dark:text-white sm:text-5xl">
-              Shop verified fashion sellers and premium collections.
+            <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+              Discover Premium
+              <br />
+              <span className="italic">Curated</span> Collections
             </h1>
-            <p className="max-w-2xl text-base text-slate-600 dark:text-slate-300">
-              Curated clothing and accessories from verified sellers—built for
-              fast discovery and trusted checkout.
+            <p className="text-base leading-relaxed text-muted-foreground">
+              Verified sellers, authentic craftsmanship, and trusted checkout.
+              Every piece tells a story of heritage.
             </p>
           </div>
-          <form className="flex w-full max-w-md flex-col gap-3 rounded-3xl border border-rose-100 bg-white/80 p-4 shadow-lg shadow-rose-100/30 dark:border-rose-500/20 dark:bg-slate-900/70">
+
+          {/* Search Form */}
+          <form className="flex w-full max-w-sm flex-col gap-4 border border-border-soft bg-card p-6">
             <Input
               name="search"
               defaultValue={search ?? ""}
-              placeholder="Search brands, styles, categories"
+              placeholder="Search collections, styles..."
             />
-            <Button size="lg" type="submit">
-              Search fashion
+            <Button size="md" type="submit">
+              Search
             </Button>
           </form>
         </section>
 
+        {/* Category Filters */}
         <section className="flex flex-wrap gap-3">
           {categories.length === 0 ? (
-            <span className="text-sm text-slate-500">
-              Categories loading or unavailable.
+            <span className="text-sm text-muted-foreground">
+              Categories loading...
             </span>
           ) : (
             categories.map((category) => (
               <Link
                 key={category.id}
                 href={buildUrl(1, category.id)}
-                className={`rounded-full border px-4 py-2 text-sm shadow-sm transition ${
-                  categoryId === category.id
-                    ? "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200"
-                    : "border-rose-100 bg-white text-slate-600 hover:border-rose-200 hover:text-rose-600 dark:border-rose-500/20 dark:bg-white/5 dark:text-slate-300"
-                }`}
+                className={`px-5 py-2.5 text-xs uppercase tracking-wider transition-all duration-300 border ${categoryId === category.id
+                    ? "border-gold bg-cream text-charcoal dark:bg-brown/30 dark:text-ivory"
+                    : "border-border-soft bg-card text-muted-foreground hover:border-gold/50 hover:text-foreground"
+                  }`}
               >
                 {category.name}
               </Link>
@@ -131,79 +136,79 @@ export default async function MarketplacePage({
           )}
         </section>
 
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Products Grid */}
+        <section className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {products.length === 0 ? (
-            <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 sm:col-span-2 lg:col-span-3">
-              <CardContent className="p-6 text-sm text-slate-600 dark:text-slate-300">
+            <Card className="sm:col-span-2 lg:col-span-3 border-border-soft">
+              <CardContent className="p-8 text-center text-muted-foreground">
                 No products found. Try adjusting your search or filters.
               </CardContent>
             </Card>
           ) : (
             products.map((product: any) => (
-              <Card
+              <Link
                 key={product.id}
-                className="group border border-rose-100/70 bg-white/80 transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/70"
+                href={`/product/${product.id}`}
+                className="group block"
               >
-                <div className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50 shadow-inner dark:border-slate-800 dark:bg-slate-950">
+                {/* Product Image */}
+                <div className="relative mb-5 overflow-hidden bg-cream dark:bg-brown/20 aspect-[3/4] border border-border-soft transition-all duration-400 group-hover:border-gold/30">
                   <img
                     src={product.images?.[0] ?? "/images/product-placeholder.svg"}
                     alt={product.title}
-                    className="aspect-[4/3] w-full bg-white object-contain p-4 transition duration-300 group-hover:scale-105 dark:bg-slate-950"
+                    className="h-full w-full object-contain p-6 transition-transform duration-500 group-hover:scale-[1.02]"
                     loading="lazy"
                   />
+                  {/* Category Tag */}
+                  <span className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground border border-border-soft">
+                    {product.category?.name ?? "Featured"}
+                  </span>
+                  {/* Verified Badge */}
+                  <span className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-wider text-gold border border-gold/20">
+                    Verified
+                  </span>
                 </div>
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-rose-500">
-                    <span>{product.category?.name ?? "Trending"}</span>
-                    <span className="rounded-full bg-rose-100 px-2 py-1 text-[10px] text-rose-600 dark:bg-rose-500/20 dark:text-rose-200">
-                      Verified
-                    </span>
-                  </div>
-                  <CardTitle className="text-lg text-slate-900 dark:text-white">
+
+                {/* Product Info */}
+                <div className="space-y-2">
+                  <h3 className="font-serif text-lg font-normal text-foreground group-hover:text-gold transition-colors duration-300">
                     {product.title}
-                  </CardTitle>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Category · {product.category?.name ?? "Apparel"}
+                  </h3>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {product.category?.name ?? "Collection"}
                   </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      View details for pricing
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/product/${product.id}`}
-                      className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:text-slate-300"
-                    >
-                      View details
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+                  <p className="text-sm text-muted-foreground">
+                    View for pricing
+                  </p>
+                </div>
+              </Link>
             ))
           )}
         </section>
 
-        <section className="flex items-center justify-between">
+        {/* Pagination */}
+        <section className="flex items-center justify-between border-t border-border-soft pt-8">
           <Button
             asChild
             variant="outline"
+            size="sm"
             disabled={pagination.page <= 1}
           >
-            <Link href={buildUrl(Math.max(pagination.page - 1, 1))}>Previous</Link>
+            <Link href={buildUrl(Math.max(pagination.page - 1, 1))}>
+              ← Previous
+            </Link>
           </Button>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">
             Page {pagination.page} of {pagination.totalPages}
           </p>
           <Button
             asChild
             variant="outline"
+            size="sm"
             disabled={pagination.page >= pagination.totalPages}
           >
             <Link href={buildUrl(Math.min(pagination.page + 1, pagination.totalPages))}>
-              Next
+              Next →
             </Link>
           </Button>
         </section>

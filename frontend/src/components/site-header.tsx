@@ -55,7 +55,7 @@ export function SiteHeader() {
     const getCookie = (name: string) => {
       const match = document.cookie.match(
         new RegExp(
-          `(?:^|; )${name.replace(/([.$?*|{}()\[\]\\/+^])/g, "\\$1")}=([^;]*)`
+          `(?:^|; )${name.replace(/([.$?*|{}()\[\]\\\/+^])/g, "\\$1")}=([^;]*)`
         )
       );
       return match ? decodeURIComponent(match[1]) : undefined;
@@ -126,129 +126,146 @@ export function SiteHeader() {
   }, [role, user]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/70 backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/70">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-rose-500 to-fuchsia-600 text-white shadow-lg shadow-rose-500/30">
-            <span className="text-lg font-semibold">T</span>
+    <header className="sticky top-0 z-30 border-b border-border-soft bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="flex h-10 w-10 items-center justify-center border border-border-warm bg-cream text-charcoal transition-colors duration-300 group-hover:bg-charcoal group-hover:text-ivory dark:bg-brown dark:text-ivory">
+            <span className="font-serif text-lg font-light">T</span>
           </div>
           <div className="leading-tight">
-            <p className="text-base font-semibold text-slate-900 dark:text-white">
+            <p className="font-serif text-lg font-normal tracking-tight text-foreground">
               TatVivah
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Multi-vendor fashion
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Premium Fashion
             </p>
           </div>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300 md:flex">
+
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="transition hover:text-rose-600 dark:hover:text-rose-400"
+              className="relative py-1 transition-colors duration-300 hover:text-foreground after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
+
+        {/* Right Side */}
+        <div className="flex items-center gap-4">
           <ThemeToggle className="hidden sm:inline-flex" />
+
+          {/* Mobile Menu Toggle */}
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 sm:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center border border-border-soft bg-card text-foreground transition-colors duration-300 hover:bg-cream dark:hover:bg-brown/50 sm:hidden"
             aria-label="Toggle menu"
             onClick={() => setMenuOpen((prev) => !prev)}
           >
-            <span className="text-lg">☰</span>
+            <span className="text-lg">{menuOpen ? "✕" : "☰"}</span>
           </button>
+
+          {/* User Menu */}
           {user ? (
-            <div className="hidden items-center gap-2 sm:flex">
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            <div className="hidden items-center gap-3 sm:flex">
+              <span className="text-xs text-muted-foreground max-w-[120px] truncate">
                 {displayName}
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                    className="flex h-9 w-9 items-center justify-center border border-border-soft bg-cream text-charcoal transition-all duration-300 hover:bg-charcoal hover:text-ivory dark:bg-brown dark:text-ivory dark:hover:bg-gold"
                     aria-label="Account menu"
                   >
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-white">
-                      {initial}
-                    </span>
+                    <span className="font-serif text-sm">{initial}</span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Account</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="min-w-[160px]">
+                  <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Account
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={profileLink}>My profile</Link>
+                    <Link href={profileLink}>My Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/login?force=1">Switch account</Link>
+                    <Link href="/login?force=1">Switch Account</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    Logout
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           ) : (
             <Link href="/login" className="hidden sm:inline-flex">
-              <Button size="sm">Get started</Button>
+              <Button size="sm" variant="primary">
+                Sign In
+              </Button>
             </Link>
           )}
         </div>
       </div>
+
+      {/* Mobile Menu */}
       {menuOpen ? (
-        <div className="border-t border-slate-200/70 bg-white/95 px-6 py-4 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-950/95 sm:hidden">
-          <div className="flex flex-col gap-2">
+        <div className="border-t border-border-soft bg-background px-6 py-6 sm:hidden">
+          <div className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:text-slate-200"
+                className="py-3 text-sm font-medium text-foreground border-b border-border-soft transition-colors hover:text-gold"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-2.5 dark:border-slate-700">
+
+            <div className="flex items-center justify-between py-3 border-b border-border-soft">
               <div className="flex items-center gap-3">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-white">
-                  {initial}
-                </span>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  {displayName}
+                <div className="flex h-8 w-8 items-center justify-center bg-cream text-charcoal dark:bg-brown dark:text-ivory">
+                  <span className="font-serif text-sm">{initial}</span>
                 </div>
+                <span className="text-sm text-foreground">{displayName}</span>
               </div>
               <ThemeToggle />
             </div>
+
             {user ? (
-              <div className="grid gap-2">
+              <div className="flex flex-col gap-2 pt-2">
                 <Link
                   href={profileLink}
-                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:text-slate-200"
+                  className="py-2 text-sm text-muted-foreground hover:text-foreground"
                   onClick={() => setMenuOpen(false)}
                 >
-                  My profile
+                  My Profile
                 </Link>
                 <Link
                   href="/login?force=1"
-                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:text-slate-200"
+                  className="py-2 text-sm text-muted-foreground hover:text-foreground"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Switch account
+                  Switch Account
                 </Link>
-                <Button size="sm" variant="outline" onClick={handleLogout}>
-                  Logout
-                </Button>
+                <button
+                  onClick={handleLogout}
+                  className="py-2 text-left text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Sign Out
+                </button>
               </div>
             ) : (
-              <Link href="/login" onClick={() => setMenuOpen(false)}>
-                <Button size="sm" className="w-full">
-                  Get started
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="pt-2">
+                <Button size="md" className="w-full">
+                  Sign In
                 </Button>
               </Link>
             )}

@@ -3,11 +3,34 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* =========================================================================
+   TatVivah Premium Design System
+   Minimal Luxury / Premium Indian Matrimonial Experience
+   ========================================================================= */
+
 @theme inline {
+  /* Core Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  
+  /* Premium Palette */
+  --color-ivory: #FAF7F2;
+  --color-cream: #F4EFE7;
+  --color-warm-white: #FFFCF8;
+  --color-gold: #B8956C;
+  --color-gold-muted: #C9AB82;
+  --color-charcoal: #2C2825;
+  --color-brown: #3D3329;
+  --color-brown-soft: #5C524A;
+  --color-border-soft: #E8E2D9;
+  --color-border-warm: #D9D0C3;
+  
+  /* Font Families */
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  
+  /* Shadcn Theme Variables */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,81 +69,135 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
-body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-}
-
-::selection {
-  background: rgba(244, 63, 94, 0.2);
-}
+/* =========================================================================
+   Root Variables - Light Theme (Premium Warm Ivory)
+   ========================================================================= */
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Premium Warm Background */
+  --background: #FAF7F2;
+  --foreground: #2C2825;
+  
+  /* Cards with subtle warmth */
+  --card: #FFFCF8;
+  --card-foreground: #2C2825;
+  
+  /* Popovers */
+  --popover: #FFFCF8;
+  --popover-foreground: #2C2825;
+  
+  /* Primary - Muted Gold */
+  --primary: #3D3329;
+  --primary-foreground: #FAF7F2;
+  
+  /* Secondary */
+  --secondary: #F4EFE7;
+  --secondary-foreground: #3D3329;
+  
+  /* Muted */
+  --muted: #F4EFE7;
+  --muted-foreground: #5C524A;
+  
+  /* Accent */
+  --accent: #F4EFE7;
+  --accent-foreground: #3D3329;
+  
+  /* Destructive - Muted warm red */
+  --destructive: #A65D57;
+  
+  /* Borders - Soft warm */
+  --border: #E8E2D9;
+  --input: #E8E2D9;
+  --ring: #B8956C;
+  
+  /* Charts - Warm palette */
+  --chart-1: #B8956C;
+  --chart-2: #8B7355;
+  --chart-3: #5C524A;
+  --chart-4: #C9AB82;
+  --chart-5: #D4C4B0;
+  
+  /* Sidebar */
+  --sidebar: #F4EFE7;
+  --sidebar-foreground: #2C2825;
+  --sidebar-primary: #3D3329;
+  --sidebar-primary-foreground: #FAF7F2;
+  --sidebar-accent: #E8E2D9;
+  --sidebar-accent-foreground: #3D3329;
+  --sidebar-border: #E8E2D9;
+  --sidebar-ring: #B8956C;
 }
 
+/* =========================================================================
+   Dark Theme - Rich Warm Tones
+   ========================================================================= */
+
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #1A1816;
+  --foreground: #F4EFE7;
+  
+  --card: #242120;
+  --card-foreground: #F4EFE7;
+  
+  --popover: #242120;
+  --popover-foreground: #F4EFE7;
+  
+  --primary: #C9AB82;
+  --primary-foreground: #1A1816;
+  
+  --secondary: #2C2825;
+  --secondary-foreground: #F4EFE7;
+  
+  --muted: #2C2825;
+  --muted-foreground: #A69A8C;
+  
+  --accent: #2C2825;
+  --accent-foreground: #F4EFE7;
+  
+  --destructive: #C47A74;
+  
+  --border: rgba(244, 239, 231, 0.1);
+  --input: rgba(244, 239, 231, 0.15);
+  --ring: #B8956C;
+  
+  --chart-1: #C9AB82;
+  --chart-2: #A69A8C;
+  --chart-3: #B8956C;
+  --chart-4: #8B7355;
+  --chart-5: #D4C4B0;
+  
+  --sidebar: #1A1816;
+  --sidebar-foreground: #F4EFE7;
+  --sidebar-primary: #C9AB82;
+  --sidebar-primary-foreground: #1A1816;
+  --sidebar-accent: #2C2825;
+  --sidebar-accent-foreground: #F4EFE7;
+  --sidebar-border: rgba(244, 239, 231, 0.1);
+  --sidebar-ring: #B8956C;
+}
+
+/* =========================================================================
+   Base Styles
+   ========================================================================= */
+
+body {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium text selection */
+::selection {
+  background: rgba(184, 149, 108, 0.25);
+  color: #2C2825;
+}
+
+.dark ::selection {
+  background: rgba(184, 149, 108, 0.35);
+  color: #F4EFE7;
 }
 
 @layer base {
@@ -130,4 +207,90 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* =========================================================================
+   Typography Utilities
+   ========================================================================= */
+
+.font-serif {
+  font-family: var(--font-cormorant), Georgia, serif;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Heading styles - Editorial feel */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Large display headings */
+.heading-display {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* =========================================================================
+   Premium Animation Classes
+   ========================================================================= */
+
+/* Slow, fabric-like transitions */
+.transition-premium {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition-duration: 500ms;
+}
+
+.transition-premium-fast {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition-duration: 300ms;
+}
+
+/* Subtle hover lift for cards */
+.hover-lift {
+  transition: transform 400ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              box-shadow 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+/* =========================================================================
+   Premium Component Base Styles
+   ========================================================================= */
+
+/* Premium button base */
+.btn-premium {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+}
+
+/* Premium card */
+.card-premium {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(44, 40, 37, 0.04),
+              0 4px 12px rgba(44, 40, 37, 0.02);
+}
+
+.dark .card-premium {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2),
+              0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Focus ring - muted gold */
+.focus-premium:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background),
+              0 0 0 4px var(--ring);
 }

@@ -1,6 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 
 const vendors = [
@@ -10,6 +11,7 @@ const vendors = [
     category: "Sarees & Ethnic",
     location: "Ahmedabad",
     rating: "4.9",
+    specialty: "Handwoven Silk",
   },
   {
     slug: "saffron-loom",
@@ -17,6 +19,7 @@ const vendors = [
     category: "Cotton & Daily Wear",
     location: "Mumbai",
     rating: "4.8",
+    specialty: "Organic Cotton",
   },
   {
     slug: "lenscraft-tailors",
@@ -24,6 +27,7 @@ const vendors = [
     category: "Men's Formal",
     location: "Delhi",
     rating: "4.7",
+    specialty: "Bespoke Tailoring",
   },
   {
     slug: "bloomarc-studio",
@@ -31,64 +35,155 @@ const vendors = [
     category: "Designer Wear",
     location: "Jaipur",
     rating: "4.8",
+    specialty: "Contemporary Fusion",
   },
 ];
 
 export default function VendorsPage() {
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
-              Verified vendors
-            </p>
-            <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-              Trusted fashion sellers across categories.
-            </h1>
-            <p className="max-w-xl text-base text-slate-600 dark:text-slate-300">
-              Browse verified fashion brands with consistent quality, pricing,
-              and on-time delivery.
-            </p>
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-16 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+                Verified Artisans
+              </p>
+              <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                Heritage Ateliers
+              </h1>
+              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+                A curated collection of India's finest craftsmen and fashion houses.
+                Each seller is verified for quality, authenticity, and reliable delivery.
+              </p>
+            </div>
+
+            {/* Trust Signals */}
+            <div className="flex flex-wrap items-center gap-6 text-xs text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-gold" />
+                Verified Craftsmanship
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-gold" />
+                Quality Assured
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-gold" />
+                Reliable Delivery
+              </span>
+            </div>
           </div>
-          <div className="flex w-full max-w-sm flex-col gap-3 rounded-3xl border border-rose-100 bg-white/80 p-4 shadow-lg shadow-rose-100/30 dark:border-rose-500/20 dark:bg-slate-900/70">
-            <Input placeholder="Search brand or city" />
-            <Button>Search brands</Button>
-          </div>
+
+          {/* Search - Concierge Tool */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="border border-border-soft bg-card p-6 space-y-4"
+          >
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Find an Artisan
+            </p>
+            <Input placeholder="Search by name or city" className="h-12" />
+            <button className="w-full h-12 bg-charcoal text-ivory text-xs font-medium uppercase tracking-[0.15em] transition-all duration-400 hover:bg-brown dark:bg-gold dark:text-charcoal dark:hover:bg-gold-muted">
+              Search Collection
+            </button>
+          </motion.div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {vendors.map((vendor) => (
-            <Card
-              key={vendor.slug}
-              className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70"
-            >
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-lg text-slate-900 dark:text-white">
-                  {vendor.name}
-                </CardTitle>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {vendor.category}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
-                  <span>{vendor.location}</span>
-                  <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600 dark:bg-rose-500/20 dark:text-rose-200">
-                    ★ {vendor.rating}
-                  </span>
-                </div>
-                <Link
-                  href={`/vendors/${vendor.slug}`}
-                  className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600 dark:border-slate-700 dark:text-slate-300"
-                >
-                  View profile
+        {/* Vendor Grid */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between border-b border-border-soft pb-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Featured Sellers ({vendors.length})
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:gap-8">
+            {vendors.map((vendor, index) => (
+              <motion.div
+                key={vendor.slug}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + index * 0.08, duration: 0.5 }}
+              >
+                <Link href={`/vendors/${vendor.slug}`}>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="group border border-border-soft bg-card p-6 lg:p-8 transition-all duration-400 hover:border-gold/40 hover:shadow-[0_4px_20px_rgba(184,149,108,0.08)]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      {/* Vendor Info */}
+                      <div className="space-y-4 flex-1">
+                        <div className="space-y-2">
+                          <h3 className="font-serif text-xl font-normal text-foreground group-hover:text-gold transition-colors duration-300">
+                            {vendor.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            {vendor.category}
+                          </p>
+                        </div>
+
+                        <div className="h-px bg-border-soft" />
+
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                          {/* Provenance / Location */}
+                          <span className="flex items-center gap-1.5">
+                            <span className="h-1 w-1 rounded-full bg-gold/50" />
+                            {vendor.location}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="h-1 w-1 rounded-full bg-gold/50" />
+                            {vendor.specialty}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Rating - Quiet */}
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-sm font-light text-foreground">
+                          {vendor.rating}
+                        </span>
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Rating
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* View Profile CTA */}
+                    <div className="mt-6 pt-4 border-t border-border-soft">
+                      <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground group-hover:text-gold transition-colors duration-300">
+                        View Profile →
+                      </span>
+                    </div>
+                  </motion.div>
                 </Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust Footer */}
+        <section className="border-t border-border-soft pt-12">
+          <div className="text-center space-y-4">
+            <p className="font-serif text-lg font-light text-foreground">
+              Trusted by Discerning Buyers Across India
+            </p>
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+              Every artisan on TatVivah is carefully vetted for quality, authenticity,
+              and commitment to heritage craftsmanship.
+            </p>
+          </div>
+        </section>
+      </motion.div>
     </div>
   );
 }
