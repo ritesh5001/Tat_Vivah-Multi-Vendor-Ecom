@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AnnouncementBar } from "@/components/announcement-bar";
 
 const buyerLinks = [
   { href: "/marketplace", label: "Shop" },
@@ -126,8 +127,9 @@ export function SiteHeader() {
   }, [role, user]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border-soft bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+    <header className="sticky top-0 z-30 flex flex-col border-b border-border-soft bg-background/95 backdrop-blur-sm">
+      <AnnouncementBar />
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="flex h-10 w-10 items-center justify-center border border-border-warm bg-cream text-charcoal transition-colors duration-300 group-hover:bg-charcoal group-hover:text-ivory dark:bg-brown dark:text-ivory">

@@ -10,6 +10,8 @@ import {
   fadeInVariants,
   viewportSettings
 } from "@/lib/motion.config";
+import { ReviewSection } from "@/components/review-section";
+import { FeaturesMarquee } from "@/components/features-marquee";
 
 export default function Home() {
   return (
@@ -111,6 +113,11 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* =========================================================================
+          FEATURES MARQUEE
+          ========================================================================= */}
+      <FeaturesMarquee />
 
       {/* =========================================================================
           CATEGORIES SECTION
@@ -310,6 +317,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* =========================================================================
+          REVIEW SECTION
+          ========================================================================= */}
+      <ReviewSection />
 
       {/* =========================================================================
           GIFTING SECTION
