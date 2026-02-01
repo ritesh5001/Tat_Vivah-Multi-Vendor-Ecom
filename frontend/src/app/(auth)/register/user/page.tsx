@@ -44,8 +44,8 @@ export default function UserRegisterPage() {
     setLoading(true);
     try {
       await registerUser({ fullName, email, phone, password });
-      toast.success("Account created. Please sign in.");
-      window.location.href = "/login";
+      toast.success("OTP sent to your email.");
+      window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Signup failed");
     } finally {

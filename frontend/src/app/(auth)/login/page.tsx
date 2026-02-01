@@ -60,9 +60,17 @@ export default function LoginPage() {
       router.push(redirectMap[role] ?? "/");
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Invalid credentials"
-      );
+      const message = error instanceof Error ? error.message : "Invalid credentials";
+      if (message.toLowerCase().includes("verification")) {
+        toast.error("Please verify your email to continue.");
+        if (identifier.includes("@")) {
+          router.push(`/verify-otp?email=${encodeURIComponent(identifier)}`);
+        } else {
+          router.push("/verify-otp");
+        }
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }

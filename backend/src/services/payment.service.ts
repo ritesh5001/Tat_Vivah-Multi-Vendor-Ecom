@@ -5,6 +5,7 @@ import { PaymentProvider, PaymentStatus, PaymentEventType, SettlementStatus, Ord
 import { prisma } from '../config/db.js';
 import { ApiError } from '../errors/ApiError.js';
 import { razorpayService } from './razorpay.service.js';
+import { notificationService } from '../notifications/notification.service.js';
 
 export class PaymentService {
 
@@ -184,6 +185,26 @@ export class PaymentService {
                 });
             }
         });
+
+        // Trigger Notifications (outside transaction)
+        try {
+            const order = await prisma.order.findUnique({
+                where: { id: payment.orderId },
+                include: { items: true }
+            });
+
+            if (order) {
+                await notificationService.notifyOrderPlaced(order.userId, order.id, Number(order.totalAmount));
+
+                const sellerIds = [...new Set(order.items.map(item => item.sellerId))];
+                for (const sellerId of sellerIds) {
+                    const sellerItems = order.items.filter(item => item.sellerId === sellerId);
+                    await notificationService.notifySellerNewOrder(sellerId, order.id, sellerItems.length);
+                }
+            }
+        } catch (notifyError) {
+            console.error('[Payment] Notification error:', notifyError);
+        }
     }
 
     async handlePaymentFailure(paymentId: string, payload: any) {

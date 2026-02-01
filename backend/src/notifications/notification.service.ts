@@ -1,4 +1,3 @@
-import { NotificationType, NotificationChannel } from '@prisma/client';
 import { CreateNotificationInput } from './types.js';
 import { notificationRepository } from './notification.repository.js';
 import { notificationQueue } from './notification.queue.js';
@@ -73,6 +72,20 @@ export class NotificationService {
             channel: 'EMAIL',
             content: `Order #${orderId} Delivered`,
             metadata: { orderId }
+        });
+    }
+
+    /**
+     * Trigger SELLER_APPROVED (Seller)
+     */
+    async notifySellerApproved(sellerId: string, email?: string | null) {
+        return this.create({
+            userId: sellerId,
+            role: 'SELLER',
+            type: 'SELLER_APPROVED',
+            channel: 'EMAIL',
+            content: 'Your seller account is approved',
+            metadata: { sellerEmail: email }
         });
     }
 
