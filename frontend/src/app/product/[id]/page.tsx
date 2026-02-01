@@ -30,64 +30,89 @@ export default async function ProductDetailPage({
     : ["/images/product-placeholder.svg"];
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <div className="mx-auto flex max-w-7xl flex-col gap-20 px-6 py-16 lg:py-20">
+        {/* Main Product Section */}
+        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
           <ProductImageCarousel images={images} title={product?.title} />
           {product ? (
             <ProductDetailClient product={product} />
           ) : (
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
-                Product unavailable
+            <div className="flex flex-col justify-center space-y-6 py-12">
+              <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-gold">
+                Product Unavailable
               </p>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">
+              <h1 className="font-serif text-3xl font-light text-foreground">
                 We couldn't load this product.
               </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-muted-foreground">
                 Please return to the marketplace and try another listing.
               </p>
             </div>
           )}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          {[
-            {
-              title: "Highlights",
-              icon: "✨",
-              copy: "Handwoven silk, rich zari border, artisan-crafted finish.",
-            },
-            {
-              title: "Fabric & Care",
-              icon: "🧵",
-              copy: "Dry clean only. Store folded with muslin cloth.",
-            },
-            {
-              title: "Delivery",
-              icon: "🚚",
-              copy: "Ships within 48 hours with insured delivery.",
-            },
-          ].map((item) => (
-            <Card
-              key={item.title}
-              className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70"
-            >
-              <CardContent className="space-y-3 p-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg" aria-hidden="true">
-                    {item.icon}
-                  </span>
-                  <p className="text-base font-semibold text-slate-900 dark:text-white">
-                    {item.title}
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
+        {/* Editorial Details Section */}
+        <section className="border-t border-border-soft pt-16">
+          <div className="mb-10">
+            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-gold mb-4">
+              Product Details
+            </p>
+            <h2 className="font-serif text-2xl font-light text-foreground">
+              Craftsmanship & Care
+            </h2>
+          </div>
+
+          <div className="grid gap-px bg-border-soft lg:grid-cols-3">
+            {[
+              {
+                title: "Highlights",
+                copy: "Handwoven silk, rich zari border, artisan-crafted finish.",
+              },
+              {
+                title: "Fabric & Care",
+                copy: "Dry clean only. Store folded with muslin cloth.",
+              },
+              {
+                title: "Delivery",
+                copy: "Ships within 48 hours with insured delivery.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="bg-card p-8 lg:p-10 space-y-4"
+              >
+                <p className="text-xs font-medium uppercase tracking-[0.15em] text-foreground">
+                  {item.title}
+                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {item.copy}
                 </p>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust Section */}
+        <section className="border-t border-border-soft pt-12">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Verified Artisans
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Secure Checkout
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Easy Returns
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Pan-India Delivery
+            </span>
+          </div>
         </section>
       </div>
     </div>

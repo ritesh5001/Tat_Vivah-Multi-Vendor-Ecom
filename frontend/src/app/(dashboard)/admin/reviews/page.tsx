@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { approveProduct, getPendingProducts, rejectProduct } from "@/services/admin";
@@ -61,43 +61,69 @@ export default function AdminReviewsPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-500">
-            Product moderation
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Product Moderation
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Approve or reject pending products.
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Compliance Reviews
           </h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Approve or reject products pending moderation with deliberate oversight.
+          </p>
         </div>
 
-        <section className="grid gap-6">
+        {/* Pending Products */}
+        <section className="space-y-6">
           {loading ? (
-            <p className="text-sm text-slate-500">Loading products...</p>
+            <div className="border border-border-soft bg-card p-12 text-center">
+              <p className="text-sm text-muted-foreground">Loading products...</p>
+            </div>
           ) : products.length === 0 ? (
-            <Card className="border border-emerald-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-              <CardContent className="p-6 text-sm text-slate-600 dark:text-slate-300">
+            <div className="border border-border-soft bg-card p-12 text-center space-y-2">
+              <p className="font-serif text-lg font-light text-foreground">
+                All Clear
+              </p>
+              <p className="text-sm text-muted-foreground">
                 No products pending moderation.
-              </CardContent>
-            </Card>
+              </p>
+            </div>
           ) : (
-            products.map((product) => (
-              <Card
+            products.map((product, index) => (
+              <motion.div
                 key={product.id}
-                className="border border-emerald-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + index * 0.05, duration: 0.5 }}
+                className="border border-border-soft bg-card"
               >
-                <CardHeader className="flex-row items-center justify-between">
-                  <CardTitle className="text-lg text-slate-900 dark:text-white">
-                    {product.title}
-                  </CardTitle>
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-200">
+                {/* Product Header */}
+                <div className="flex items-center justify-between gap-4 p-6 border-b border-border-soft">
+                  <div className="space-y-1">
+                    <p className="font-serif text-lg font-normal text-foreground">
+                      {product.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {product.categoryName ?? "Uncategorized"} · Seller: {product.sellerEmail ?? product.sellerId?.slice(0, 8)}
+                    </p>
+                  </div>
+                  <span className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider border border-[#B8956C]/30 text-[#8A7054] bg-[#B8956C]/5">
                     {product.moderation?.status ?? "PENDING"}
                   </span>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                </div>
+
+                {/* Action Area */}
+                <div className="p-6 space-y-4">
                   <Input
-                    placeholder="Reason for rejection"
+                    placeholder="Reason for rejection (required to reject)"
                     value={reasons[product.id] ?? ""}
                     onChange={(event) =>
                       setReasons((prev) => ({
@@ -105,21 +131,31 @@ export default function AdminReviewsPage() {
                         [product.id]: event.target.value,
                       }))
                     }
+                    className="h-12"
                   />
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleApprove(product.id)}>
+                  <div className="flex gap-3">
+                    <Button
+                      size="sm"
+                      onClick={() => handleApprove(product.id)}
+                      className="h-10 px-6"
+                    >
                       Approve
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleReject(product.id)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleReject(product.id)}
+                      className="h-10 px-6 text-muted-foreground hover:text-[#7A5656] hover:border-[#A67575]/40"
+                    >
                       Reject
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </motion.div>
             ))
           )}
         </section>
-      </div>
+      </motion.div>
     </div>
   );
 }

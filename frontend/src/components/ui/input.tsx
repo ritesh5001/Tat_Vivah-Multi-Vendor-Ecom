@@ -2,8 +2,16 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends React.InputHTMLAttributes<HTMLInputElement> { }
 
+/**
+ * Premium Input Component
+ * 
+ * - Calm focus states with muted gold ring
+ * - Soft ivory backgrounds
+ * - Generous padding
+ * - Smooth transitions
+ */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = "text", ...props }, ref) => {
     return (
@@ -11,7 +19,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         type={type}
         className={cn(
-          "flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+          // Base structure
+          "flex h-12 w-full rounded-sm border border-border-soft bg-card px-4",
+          // Typography
+          "text-sm text-foreground placeholder:text-muted-foreground",
+          // Premium transition
+          "transition-all duration-300 ease-out",
+          // Focus state - muted gold ring
+          "focus-visible:outline-none focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/20",
+          // Disabled state
+          "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted",
+          // File input styling
+          "file:border-0 file:bg-transparent file:text-sm file:font-medium",
           className
         )}
         {...props}

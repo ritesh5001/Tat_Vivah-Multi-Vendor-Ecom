@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const services = [
   "Custom tailoring",
@@ -24,106 +26,201 @@ const packages = [
 
 export default function VendorProfilePage() {
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <section className="flex flex-col gap-6 rounded-3xl border border-rose-100 bg-white/80 p-8 shadow-lg shadow-rose-100/30 dark:border-rose-500/20 dark:bg-slate-900/70">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
-                Vendor profile
-              </p>
-              <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-                Aarohi Atelier
-              </h1>
-              <p className="text-base text-slate-600 dark:text-slate-300">
-                Ahmedabad · Sarees & Ethnic · ★ 4.9 (4,200+ orders)
-              </p>
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:py-20"
+      >
+        {/* Hero Section */}
+        <section className="border border-border-soft bg-card p-8 lg:p-12 space-y-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+                  Verified Artisan
+                </p>
+                <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+                  Aarohi Atelier
+                </h1>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-gold" />
+                  Ahmedabad
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-gold" />
+                  Sarees & Ethnic
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-gold" />
+                  4.9 Rating
+                </span>
+                <span className="text-xs px-2 py-0.5 border border-border-soft">
+                  4,200+ orders
+                </span>
+              </div>
             </div>
+
             <div className="flex gap-3">
-              <Button variant="outline">Save brand</Button>
-              <Button>Contact seller</Button>
+              <Button variant="outline">Save Brand</Button>
+              <Button>Contact Seller</Button>
             </div>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+
+          <div className="h-px bg-border-soft" />
+
+          <p className="text-sm leading-relaxed text-muted-foreground max-w-2xl">
             Premium ethnic wear with handcrafted fabrics, curated collections,
-            and dedicated fit assistance.
+            and dedicated fit assistance. Trusted by discerning buyers for heritage craftsmanship.
           </p>
         </section>
 
+        {/* Services & Packages Grid */}
         <section className="grid gap-6 lg:grid-cols-3">
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Services
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-              {services.map((service) => (
-                <div
+          {/* Services */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
+            className="border border-border-soft bg-card"
+          >
+            <div className="border-b border-border-soft p-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                Services Offered
+              </p>
+              <p className="font-serif text-lg font-light text-foreground">
+                Craftsmanship
+              </p>
+            </div>
+            <div className="p-6 space-y-3">
+              {services.map((service, index) => (
+                <motion.div
                   key={service}
-                  className="rounded-2xl border border-rose-100 bg-rose-50/60 px-4 py-3 dark:border-rose-500/20 dark:bg-rose-500/10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 + index * 0.05, duration: 0.4 }}
+                  className="flex items-center gap-3 py-3 px-4 border border-border-soft bg-cream/30 dark:bg-brown/10"
                 >
-                  {service}
-                </div>
+                  <span className="h-1 w-1 rounded-full bg-gold" />
+                  <span className="text-sm text-foreground">{service}</span>
+                </motion.div>
               ))}
-            </CardContent>
-          </Card>
-          <Card className="border border-rose-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">
-                Packages
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              {packages.map((pack) => (
-                <div
+            </div>
+          </motion.div>
+
+          {/* Packages */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.5 }}
+            className="lg:col-span-2 border border-border-soft bg-card"
+          >
+            <div className="border-b border-border-soft p-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                Curated Packages
+              </p>
+              <p className="font-serif text-lg font-light text-foreground">
+                Bespoke Collections
+              </p>
+            </div>
+            <div className="grid gap-px bg-border-soft sm:grid-cols-2">
+              {packages.map((pack, index) => (
+                <motion.div
                   key={pack.name}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950/60"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
+                  whileHover={{ y: -2 }}
+                  className="bg-card p-6 space-y-4 transition-all duration-300"
                 >
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                    {pack.name}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {pack.detail}
-                  </p>
-                  <p className="mt-4 text-lg font-semibold text-rose-600">
-                    {pack.price}
-                  </p>
-                  <Button size="sm" className="mt-3">
-                    Request quote
-                  </Button>
-                </div>
+                  <div className="space-y-2">
+                    <p className="font-serif text-lg font-normal text-foreground">
+                      {pack.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {pack.detail}
+                    </p>
+                  </div>
+                  <div className="h-px bg-border-soft" />
+                  <div className="flex items-center justify-between">
+                    <p className="font-serif text-xl font-light text-foreground">
+                      {pack.price}
+                    </p>
+                    <Button size="sm" variant="outline">
+                      Request Quote
+                    </Button>
+                  </div>
+                </motion.div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </section>
 
-        <section className="flex flex-col gap-6 rounded-3xl border border-rose-100 bg-white/80 p-6 shadow-lg shadow-rose-100/30 dark:border-rose-500/20 dark:bg-slate-900/70">
+        {/* Featured Offerings */}
+        <motion.section
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="border border-border-soft bg-card p-6 lg:p-8 space-y-6"
+        >
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Featured offerings
-            </h2>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                Featured Collections
+              </p>
+              <p className="font-serif text-lg font-light text-foreground">
+                Current Offerings
+              </p>
+            </div>
             <Link
               href="/marketplace"
-              className="text-sm font-semibold text-rose-600 hover:text-rose-500"
+              className="text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors duration-300"
             >
-              Browse collections
+              Browse All →
             </Link>
           </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             {["Festive Saree Capsule", "Signature Silk Collection"].map(
-              (item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300"
-              >
-                {item}
-              </div>
+              (item, index) => (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center justify-between py-4 px-5 border border-border-soft bg-cream/30 dark:bg-brown/10 transition-all duration-300 hover:border-gold/40"
+                >
+                  <span className="text-sm text-foreground">{item}</span>
+                  <span className="text-muted-foreground">→</span>
+                </motion.div>
               )
             )}
           </div>
+        </motion.section>
+
+        {/* Trust Footer */}
+        <section className="border-t border-border-soft pt-8">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Verified Artisan
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Quality Assured
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              Buyer Protection
+            </span>
+          </div>
         </section>
-      </div>
+      </motion.div>
     </div>
   );
 }

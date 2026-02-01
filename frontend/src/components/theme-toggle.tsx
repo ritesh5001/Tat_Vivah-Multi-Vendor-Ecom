@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const storageKey = "tatvivah-theme";
@@ -36,17 +35,18 @@ export function ThemeToggle({ className }: { className?: string }) {
   };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      size="sm"
       onClick={toggle}
-      className={cn("h-9 w-9 rounded-full p-0", className)}
+      className={cn(
+        "h-9 w-9 flex items-center justify-center border border-border-soft bg-card text-muted-foreground transition-all duration-300 hover:bg-cream hover:text-foreground dark:hover:bg-brown/50",
+        className
+      )}
       aria-label="Toggle theme"
     >
-      <span className="text-base">
-        {theme === "dark" ? "🌙" : "☀️"}
+      <span className="text-sm">
+        {theme === "dark" ? "◐" : "○"}
       </span>
-    </Button>
+    </button>
   );
 }

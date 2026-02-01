@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerSeller } from "@/services/auth";
 import { toast } from "sonner";
+import { heroContainerVariants, heroItemVariants } from "@/lib/motion.config";
 
 export default function SellerRegisterPage() {
   const [email, setEmail] = React.useState("");
@@ -51,125 +53,153 @@ export default function SellerRegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-indigo-50 via-white to-rose-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex min-h-[calc(100vh-160px)] max-w-6xl flex-col items-center justify-center gap-10 px-6 py-16 lg:flex-row">
-        <div className="flex-1 space-y-6">
-          <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200">
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <div className="mx-auto flex min-h-[calc(100vh-160px)] max-w-6xl flex-col items-center justify-center gap-16 px-6 py-16 lg:flex-row lg:gap-24">
+        {/* Left Section - Editorial */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={heroContainerVariants}
+          className="flex-1 max-w-md lg:max-w-lg"
+        >
+          <motion.p
+            variants={heroItemVariants}
+            className="text-xs font-medium uppercase tracking-[0.3em] text-gold mb-6"
+          >
             Seller Registration
-          </span>
-          <h1 className="text-4xl font-semibold text-slate-900 sm:text-5xl dark:text-white">
-            Grow your business with TatVivah.
-          </h1>
-          <p className="text-base text-slate-600 sm:text-lg dark:text-slate-300">
-            Join trusted vendors across the country. Manage catalog, appointments,
-            and payments with dedicated seller tools.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 text-sm text-slate-600 shadow-sm dark:border-indigo-500/30 dark:bg-white/5 dark:text-slate-300">
-              Dedicated seller dashboard
-            </div>
-            <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 text-sm text-slate-600 shadow-sm dark:border-indigo-500/30 dark:bg-white/5 dark:text-slate-300">
-              Instant payout tracking
-            </div>
-            <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 text-sm text-slate-600 shadow-sm dark:border-indigo-500/30 dark:bg-white/5 dark:text-slate-300">
-              Priority support team
-            </div>
-            <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 text-sm text-slate-600 shadow-sm dark:border-indigo-500/30 dark:bg-white/5 dark:text-slate-300">
-              Verified vendor badge
-            </div>
-          </div>
-        </div>
-        <Card className="w-full max-w-lg dark:border-slate-800/70 dark:bg-slate-900/70">
-          <CardHeader className="space-y-2">
-            <CardTitle className="dark:text-white">Register your business</CardTitle>
-            <CardDescription>
-              Provide business details to create a seller account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="dark:text-slate-200">
-                  Personal Email/Business email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="owner@brand.com"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="dark:text-slate-200">
-                  Contact number
-                </Label>
-                <Input
-                  id="phone"
-                  placeholder="9876543210"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="dark:text-slate-200">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Min 8 chars, 1 uppercase, 1 number"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((value) => !value)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm" className="dark:text-slate-200">
-                    Confirm password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="confirm"
-                      type={showConfirm ? "text" : "password"}
-                      placeholder="Re-enter password"
-                      value={confirmPassword}
-                      onChange={(event) => setConfirmPassword(event.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm((value) => !value)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
-                    >
-                      {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <Button className="w-full" size="lg" disabled={loading}>
-                {loading ? "Submitting..." : "Create seller account"}
-              </Button>
-            </form>
-            <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-              Already a seller?{" "}
-              <Link
-                className="font-semibold text-indigo-600 hover:text-indigo-500"
-                href="/login"
+          </motion.p>
+
+          <motion.h1
+            variants={heroItemVariants}
+            className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl mb-6"
+          >
+            Grow your
+            <br />
+            <span className="italic">business</span> with us.
+          </motion.h1>
+
+          <motion.p
+            variants={heroItemVariants}
+            className="text-base leading-relaxed text-muted-foreground mb-8"
+          >
+            Join trusted vendors across India. Manage your catalog, appointments,
+            and payments with dedicated seller tools built for craftsmen.
+          </motion.p>
+
+          <motion.div
+            variants={heroItemVariants}
+            className="grid gap-3 sm:grid-cols-2"
+          >
+            {[
+              "Dedicated seller dashboard",
+              "Instant payout tracking",
+              "Priority support team",
+              "Verified vendor badge",
+            ].map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 text-sm text-muted-foreground"
               >
-                Sign in
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
+                <span className="h-1 w-1 rounded-full bg-gold" />
+                {item}
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+          className="w-full max-w-md"
+        >
+          <Card className="border-border-soft">
+            <CardHeader className="space-y-3 pb-6">
+              <CardTitle className="font-serif text-2xl font-normal">
+                Register Your Business
+              </CardTitle>
+              <CardDescription>
+                Provide business details to create a seller account on TatVivah.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <form className="space-y-5" onSubmit={handleSubmit}>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Business Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="owner@brand.com"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Contact Number</Label>
+                  <Input
+                    id="phone"
+                    placeholder="9876543210"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Min 8 chars"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-300"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm">Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirm"
+                        type={showConfirm ? "text" : "password"}
+                        placeholder="Re-enter"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm((value) => !value)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-300"
+                      >
+                        {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <Button className="w-full" size="lg" disabled={loading}>
+                  {loading ? "Submitting..." : "Create Seller Account"}
+                </Button>
+              </form>
+              <p className="text-center text-sm text-muted-foreground">
+                Already a seller?{" "}
+                <Link
+                  className="text-foreground hover:text-gold transition-colors duration-300"
+                  href="/login"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

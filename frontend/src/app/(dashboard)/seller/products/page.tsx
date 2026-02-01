@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import ImageKit from "imagekit-javascript";
+import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -202,9 +202,9 @@ export default function SellerProductsPage() {
         prev.map((product) =>
           product.id === productId
             ? {
-                ...product,
-                variants: [...(product.variants ?? []), result.variant],
-              }
+              ...product,
+              variants: [...(product.variants ?? []), result.variant],
+            }
             : product
         )
       );
@@ -238,12 +238,12 @@ export default function SellerProductsPage() {
         prev.map((product) =>
           product.id === editingProductId
             ? {
-                ...product,
-                ...result.product,
-                category:
-                  categories.find((c) => c.id === result.product.category?.id) ??
-                  product.category,
-              }
+              ...product,
+              ...result.product,
+              category:
+                categories.find((c) => c.id === result.product.category?.id) ??
+                product.category,
+            }
             : product
         )
       );
@@ -268,12 +268,12 @@ export default function SellerProductsPage() {
           variants: (product.variants ?? []).map((variant: any) =>
             variant.id === variantId
               ? {
-                  ...variant,
-                  inventory: {
-                    ...(variant.inventory ?? {}),
-                    stock: result.inventory.stock,
-                  },
-                }
+                ...variant,
+                inventory: {
+                  ...(variant.inventory ?? {}),
+                  stock: result.inventory.stock,
+                },
+              }
               : variant
           ),
         }))
@@ -331,10 +331,10 @@ export default function SellerProductsPage() {
           variants: (product.variants ?? []).map((variant: any) =>
             variant.id === variantId
               ? {
-                  ...variant,
-                  price: result.variant.price,
-                  compareAtPrice: result.variant.compareAtPrice ?? null,
-                }
+                ...variant,
+                price: result.variant.price,
+                compareAtPrice: result.variant.compareAtPrice ?? null,
+              }
               : variant
           ),
         }))
@@ -407,12 +407,10 @@ export default function SellerProductsPage() {
         error instanceof Error
           ? error.message
           : (error as any)?.response?.data?.message ??
-            (error as any)?.response?.message ??
-            (error as any)?.message ??
-            "Image upload failed";
-      toast.error(
-        message
-      );
+          (error as any)?.response?.message ??
+          (error as any)?.message ??
+          "Image upload failed";
+      toast.error(message);
     } finally {
       setUploadingImages(false);
       event.target.value = "";
@@ -437,217 +435,253 @@ export default function SellerProductsPage() {
   }, [products, searchQuery]);
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-indigo-50 via-white to-rose-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
-            Product catalog
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Product Catalog
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Create and manage your listings.
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Manage Your Listings
           </h1>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500 dark:text-slate-300">
-            Manage all published and draft listings.
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Create, edit, and organize your fashion products with care and precision.
           </p>
-          <Button onClick={() => setShowCreateModal(true)}>Add product</Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-100/70 bg-white/80 p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
-          <div className="flex flex-1 items-center gap-2">
-            <Search className="h-4 w-4 text-slate-400" />
-            <Input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by product, category, or SKU"
-              className="border-0 bg-transparent focus-visible:ring-0"
-            />
-          </div>
-          <Button variant="outline" onClick={() => setSearchQuery("")}>Clear</Button>
+        {/* Action Bar */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            {filteredProducts.length} listings in your catalog
+          </p>
+          <Button onClick={() => setShowCreateModal(true)}>
+            Add New Product
+          </Button>
         </div>
 
-        <section className="grid gap-6 md:grid-cols-2">
+        {/* Search */}
+        <div className="border border-border-soft bg-card p-4 flex items-center gap-3">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search by product, category, or SKU..."
+            className="border-0 bg-transparent focus-visible:ring-0 h-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Products Grid */}
+        <section className="space-y-6">
           {loading ? (
-            <p className="text-sm text-slate-500">Loading products...</p>
+            <div className="py-16 text-center">
+              <p className="text-sm text-muted-foreground">Loading products...</p>
+            </div>
           ) : filteredProducts.length === 0 ? (
-            <p className="text-sm text-slate-500">No products yet.</p>
+            <div className="py-16 text-center border border-border-soft bg-card">
+              <p className="text-sm text-muted-foreground">
+                No products yet. Create your first listing.
+              </p>
+            </div>
           ) : (
-            filteredProducts.map((product: any) => (
-              <Card
-                key={product.id}
-                className={`border border-indigo-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70 ${
-                  product.deletedByAdmin ? "opacity-70" : ""
-                }`}
-              >
-                <CardHeader className="flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg text-slate-900 dark:text-white">
-                      {product.title}
-                    </CardTitle>
-                    <p className="text-sm text-slate-500 dark:text-slate-300">
-                      {product.category?.name ?? "Uncategorized"}
-                    </p>
-                    {product.deletedByAdmin ? (
-                      <p className="mt-2 text-xs font-semibold text-rose-600">
-                        Deleted by admin{product.deletedByAdminReason ? ` · ${product.deletedByAdminReason}` : ""}
+            <div className="grid gap-6 md:grid-cols-2">
+              {filteredProducts.map((product: any, index: number) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className={`border border-border-soft bg-card ${product.deletedByAdmin ? "opacity-60" : ""
+                    }`}
+                >
+                  {/* Product Header */}
+                  <div className="flex items-start justify-between gap-4 p-6 border-b border-border-soft">
+                    <div className="space-y-1">
+                      <h3 className="font-serif text-lg font-normal text-foreground">
+                        {product.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {product.category?.name ?? "Uncategorized"}
                       </p>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        editingProductId === product.id
-                          ? setEditingProductId(null)
-                          : handleEditProduct(product)
-                      }
-                      disabled={product.deletedByAdmin}
-                    >
-                      {editingProductId === product.id ? "Close" : "Edit"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(product.id)}
-                      disabled={product.deletedByAdmin}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {product.images?.length ? (
-                    <div className="grid grid-cols-3 gap-2">
-                      {product.images.slice(0, 3).map((image: string) => (
-                        <div
-                          key={image}
-                          className="h-20 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
-                        >
-                          <img
-                            src={image}
-                            alt={product.title}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ))}
+                      {product.deletedByAdmin ? (
+                        <p className="text-xs text-red-600/80 mt-2">
+                          Removed by admin{product.deletedByAdminReason ? ` · ${product.deletedByAdminReason}` : ""}
+                        </p>
+                      ) : null}
                     </div>
-                  ) : null}
-                  {editingProductId === product.id && (
-                    <div className="grid gap-4 rounded-2xl border border-dashed border-slate-200 p-4 dark:border-slate-700">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label className="dark:text-slate-200">Category</Label>
-                          <select
-                            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
-                            value={editForm.categoryId}
-                            onChange={(event) =>
-                              setEditForm((prev) => ({
-                                ...prev,
-                                categoryId: event.target.value,
-                              }))
-                            }
-                            disabled={product.deletedByAdmin}
-                          >
-                            <option value="">Select category</option>
-                            {categories.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="dark:text-slate-200">Title</Label>
-                          <Input
-                            value={editForm.title}
-                            onChange={(event) =>
-                              setEditForm((prev) => ({
-                                ...prev,
-                                title: event.target.value,
-                              }))
-                            }
-                            disabled={product.deletedByAdmin}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="dark:text-slate-200">Description</Label>
-                        <Input
-                          value={editForm.description}
-                          onChange={(event) =>
-                            setEditForm((prev) => ({
-                              ...prev,
-                              description: event.target.value,
-                            }))
-                          }
-                          disabled={product.deletedByAdmin}
-                        />
-                      </div>
-                      <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                        <input
-                          type="checkbox"
-                          checked={editForm.isPublished}
-                          onChange={(event) =>
-                            setEditForm((prev) => ({
-                              ...prev,
-                              isPublished: event.target.checked,
-                            }))
-                          }
-                          disabled={product.deletedByAdmin}
-                        />
-                        Published
-                      </label>
+                    <div className="flex items-center gap-2">
                       <Button
-                        className="w-full sm:w-auto"
-                        onClick={handleSaveProduct}
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          editingProductId === product.id
+                            ? setEditingProductId(null)
+                            : handleEditProduct(product)
+                        }
                         disabled={product.deletedByAdmin}
                       >
-                        Save changes
+                        {editingProductId === product.id ? "Close" : "Edit"}
                       </Button>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        disabled={product.deletedByAdmin}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
                     </div>
-                  )}
-                  <div className="grid gap-2 text-sm text-slate-600 dark:text-slate-300">
-                    {product.variants?.length ? (
-                      product.variants.map((variant: any) => (
-                        <div
-                          key={variant.id}
-                          className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                              <p className="font-semibold text-slate-900 dark:text-white">
-                                {variant.sku}
-                              </p>
-                              <p className="text-xs">
-                                Stock: {variant.inventory?.stock ?? 0}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <p className="font-semibold text-rose-600">
-                                {currency.format(variant.price)}
-                              </p>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  if (product.deletedByAdmin) return;
-                                  handleVariantEditToggle(variant);
-                                }}
-                                disabled={product.deletedByAdmin}
-                              >
-                                {variantEditsOpen[variant.id] ? "Close" : "Edit"}
-                              </Button>
-                            </div>
-                          </div>
+                  </div>
 
-                          {variantEditsOpen[variant.id] ? (
-                            <div className="mt-4 grid gap-3 rounded-xl border border-dashed border-slate-200 p-3 dark:border-slate-700">
-                              <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="p-6 space-y-6">
+                    {/* Product Images */}
+                    {product.images?.length ? (
+                      <div className="flex gap-2">
+                        {product.images.slice(0, 3).map((image: string) => (
+                          <div
+                            key={image}
+                            className="h-16 w-16 overflow-hidden border border-border-soft"
+                          >
+                            <img
+                              src={image}
+                              alt={product.title}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {/* Edit Form */}
+                    {editingProductId === product.id && (
+                      <div className="space-y-4 p-4 border border-dashed border-border-soft">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label>Category</Label>
+                            <select
+                              className="h-12 w-full border border-border-soft bg-card px-3 text-sm text-foreground"
+                              value={editForm.categoryId}
+                              onChange={(event) =>
+                                setEditForm((prev) => ({
+                                  ...prev,
+                                  categoryId: event.target.value,
+                                }))
+                              }
+                              disabled={product.deletedByAdmin}
+                            >
+                              <option value="">Select category</option>
+                              {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                  {category.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Title</Label>
+                            <Input
+                              value={editForm.title}
+                              onChange={(event) =>
+                                setEditForm((prev) => ({
+                                  ...prev,
+                                  title: event.target.value,
+                                }))
+                              }
+                              disabled={product.deletedByAdmin}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Description</Label>
+                          <Input
+                            value={editForm.description}
+                            onChange={(event) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                description: event.target.value,
+                              }))
+                            }
+                            disabled={product.deletedByAdmin}
+                          />
+                        </div>
+                        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <input
+                            type="checkbox"
+                            checked={editForm.isPublished}
+                            onChange={(event) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                isPublished: event.target.checked,
+                              }))
+                            }
+                            disabled={product.deletedByAdmin}
+                            className="accent-gold"
+                          />
+                          Published
+                        </label>
+                        <Button
+                          onClick={handleSaveProduct}
+                          disabled={product.deletedByAdmin}
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Variants */}
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                        Variants
+                      </p>
+                      {product.variants?.length ? (
+                        product.variants.map((variant: any) => (
+                          <div
+                            key={variant.id}
+                            className="border border-border-soft p-4 space-y-4"
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div>
+                                <p className="font-medium text-foreground">
+                                  {variant.sku}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Stock: {variant.inventory?.stock ?? 0}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <p className="font-serif text-lg font-light text-foreground">
+                                  {currency.format(variant.price)}
+                                </p>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (product.deletedByAdmin) return;
+                                    handleVariantEditToggle(variant);
+                                  }}
+                                  disabled={product.deletedByAdmin}
+                                >
+                                  {variantEditsOpen[variant.id] ? "Close" : "Edit"}
+                                </Button>
+                              </div>
+                            </div>
+
+                            {variantEditsOpen[variant.id] ? (
+                              <div className="grid gap-3 sm:grid-cols-3 pt-4 border-t border-border-soft">
                                 <div className="space-y-1">
-                                  <Label className="text-xs text-slate-500">Price</Label>
+                                  <Label className="text-xs">Price</Label>
                                   <Input
                                     value={variantEdits[variant.id]?.price ?? ""}
                                     onChange={(event) =>
@@ -665,7 +699,7 @@ export default function SellerProductsPage() {
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-xs text-slate-500">Compare at</Label>
+                                  <Label className="text-xs">Compare at</Label>
                                   <Input
                                     value={
                                       variantEdits[variant.id]?.compareAtPrice ??
@@ -685,7 +719,7 @@ export default function SellerProductsPage() {
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-xs text-slate-500">Stock</Label>
+                                  <Label className="text-xs">Stock</Label>
                                   <Input
                                     value={
                                       stockEdits[variant.id] ??
@@ -701,260 +735,283 @@ export default function SellerProductsPage() {
                                     disabled={product.deletedByAdmin}
                                   />
                                 </div>
+                                <div className="sm:col-span-3 flex flex-wrap gap-2 pt-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleVariantUpdate(variant.id)}
+                                    disabled={product.deletedByAdmin}
+                                  >
+                                    Save Pricing
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStockChange(variant.id)}
+                                    disabled={product.deletedByAdmin}
+                                  >
+                                    Update Stock
+                                  </Button>
+                                </div>
                               </div>
-                              <div className="flex flex-wrap gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleVariantUpdate(variant.id)}
-                                  disabled={product.deletedByAdmin}
-                                >
-                                  Save pricing
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleStockChange(variant.id)}
-                                  disabled={product.deletedByAdmin}
-                                >
-                                  Update stock
-                                </Button>
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-slate-500">No variants yet.</p>
-                    )}
-                  </div>
-
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-4 dark:border-slate-700">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                        Add variant
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setActiveProductId((prev) =>
-                            prev === product.id ? null : product.id
-                          )
-                        }
-                        disabled={product.deletedByAdmin}
-                      >
-                        {activeProductId === product.id ? "Close" : "Open"}
-                      </Button>
+                            ) : null}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No variants yet.</p>
+                      )}
                     </div>
-                    {activeProductId === product.id && (
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <Input
-                          placeholder="SKU"
-                          value={variantForm.sku}
-                          onChange={(event) =>
-                            setVariantForm((prev) => ({
-                              ...prev,
-                              sku: event.target.value,
-                            }))
-                          }
-                          disabled={product.deletedByAdmin}
-                        />
-                        <Input
-                          placeholder="Price"
-                          value={variantForm.price}
-                          onChange={(event) =>
-                            setVariantForm((prev) => ({
-                              ...prev,
-                              price: event.target.value,
-                            }))
-                          }
-                          disabled={product.deletedByAdmin}
-                        />
-                        <Input
-                          placeholder="Compare at"
-                          value={variantForm.compareAtPrice}
-                          onChange={(event) =>
-                            setVariantForm((prev) => ({
-                              ...prev,
-                              compareAtPrice: event.target.value,
-                            }))
-                          }
-                          disabled={product.deletedByAdmin}
-                        />
-                        <Input
-                          placeholder="Initial stock"
-                          value={variantForm.initialStock}
-                          onChange={(event) =>
-                            setVariantForm((prev) => ({
-                              ...prev,
-                              initialStock: event.target.value,
-                            }))
-                          }
-                          disabled={product.deletedByAdmin}
-                        />
+
+                    {/* Add Variant */}
+                    <div className="border border-dashed border-border-soft p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                          Add Variant
+                        </p>
                         <Button
-                          className="sm:col-span-2"
-                          onClick={() => handleAddVariant(product.id)}
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setActiveProductId((prev) =>
+                              prev === product.id ? null : product.id
+                            )
+                          }
                           disabled={product.deletedByAdmin}
                         >
-                          Save variant
+                          {activeProductId === product.id ? "Close" : "Open"}
                         </Button>
                       </div>
-                    )}
+                      {activeProductId === product.id && (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Input
+                            placeholder="SKU"
+                            value={variantForm.sku}
+                            onChange={(event) =>
+                              setVariantForm((prev) => ({
+                                ...prev,
+                                sku: event.target.value,
+                              }))
+                            }
+                            disabled={product.deletedByAdmin}
+                          />
+                          <Input
+                            placeholder="Price"
+                            value={variantForm.price}
+                            onChange={(event) =>
+                              setVariantForm((prev) => ({
+                                ...prev,
+                                price: event.target.value,
+                              }))
+                            }
+                            disabled={product.deletedByAdmin}
+                          />
+                          <Input
+                            placeholder="Compare at"
+                            value={variantForm.compareAtPrice}
+                            onChange={(event) =>
+                              setVariantForm((prev) => ({
+                                ...prev,
+                                compareAtPrice: event.target.value,
+                              }))
+                            }
+                            disabled={product.deletedByAdmin}
+                          />
+                          <Input
+                            placeholder="Initial stock"
+                            value={variantForm.initialStock}
+                            onChange={(event) =>
+                              setVariantForm((prev) => ({
+                                ...prev,
+                                initialStock: event.target.value,
+                              }))
+                            }
+                            disabled={product.deletedByAdmin}
+                          />
+                          <Button
+                            className="sm:col-span-2"
+                            onClick={() => handleAddVariant(product.id)}
+                            disabled={product.deletedByAdmin}
+                          >
+                            Save Variant
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))
+                </motion.div>
+              ))}
+            </div>
           )}
         </section>
-      </div>
+      </motion.div>
 
-      {showCreateModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-2xl rounded-3xl border border-indigo-100 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-950">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
-                  New product
-                </p>
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-                  Add a listing
-                </h2>
+      {/* Create Product Modal */}
+      <AnimatePresence>
+        {showCreateModal ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/40 px-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="w-full max-w-2xl border border-border-soft bg-card p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+                    New Product
+                  </p>
+                  <h2 className="font-serif text-2xl font-light text-foreground">
+                    Create a Listing
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-                Close
-              </Button>
-            </div>
-            <form className="grid gap-4" onSubmit={handleCreateProduct}>
-              <div className="grid gap-4 sm:grid-cols-2">
+
+              <form className="space-y-6" onSubmit={handleCreateProduct}>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <select
+                      className="h-12 w-full border border-border-soft bg-card px-3 text-sm text-foreground"
+                      value={form.categoryId}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          categoryId: event.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">Select category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Title</Label>
+                    <Input
+                      value={form.title}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, title: event.target.value }))
+                      }
+                      placeholder="Premium linen kurta"
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
-                  <Label className="dark:text-slate-200">Category</Label>
-                  <select
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
-                    value={form.categoryId}
+                  <Label>Description</Label>
+                  <Input
+                    value={form.description}
                     onChange={(event) =>
                       setForm((prev) => ({
                         ...prev,
-                        categoryId: event.target.value,
+                        description: event.target.value,
                       }))
                     }
-                  >
-                    <option value="">Select category</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="dark:text-slate-200">Title</Label>
-                  <Input
-                    value={form.title}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, title: event.target.value }))
-                    }
-                    placeholder="Premium linen kurta"
+                    placeholder="Fabric details, fit, and highlights"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="dark:text-slate-200">Description</Label>
-                <Input
-                  value={form.description}
-                  onChange={(event) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      description: event.target.value,
-                    }))
-                  }
-                  placeholder="Fabric details, fit, and highlights"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={form.isPublished}
-                  onChange={(event) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      isPublished: event.target.checked,
-                    }))
-                  }
-                />
-                Publish immediately
-              </label>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="dark:text-slate-200">Product images</Label>
-                  <span className="text-xs text-slate-500">
-                    {images.length}/5 uploaded
-                  </span>
-                </div>
-                <div className="rounded-2xl border border-dashed border-slate-200 p-4 dark:border-slate-700">
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
                   <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleUploadImages}
-                    className="hidden"
-                    id="product-image-upload"
+                    type="checkbox"
+                    checked={form.isPublished}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        isPublished: event.target.checked,
+                      }))
+                    }
+                    className="accent-gold"
                   />
-                  <label
-                    htmlFor="product-image-upload"
-                    className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-6 text-sm text-slate-600 transition hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300"
-                  >
-                    {uploadingImages ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Uploading images...
-                      </div>
-                    ) : (
-                      <span>Click to upload images (1-5)</span>
-                    )}
-                  </label>
-                  {images.length > 0 && (
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      {images.map((image) => (
-                        <div
-                          key={image.fileId}
-                          className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
-                        >
-                          <img
-                            src={image.url}
-                            alt={image.name}
-                            className="h-24 w-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(image.fileId)}
-                            className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100"
-                            aria-label="Remove image"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
+                  Publish immediately
+                </label>
+
+                {/* Image Upload */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Product Images</Label>
+                    <span className="text-xs text-muted-foreground">
+                      {images.length}/5 uploaded
+                    </span>
+                  </div>
+                  <div className="border border-dashed border-border-soft p-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleUploadImages}
+                      className="hidden"
+                      id="product-image-upload"
+                    />
+                    <label
+                      htmlFor="product-image-upload"
+                      className="flex cursor-pointer flex-col items-center gap-2 py-6 text-sm text-muted-foreground transition hover:text-foreground"
+                    >
+                      {uploadingImages ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Uploading images...
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      ) : (
+                        <span>Click to upload images (1-5)</span>
+                      )}
+                    </label>
+                    {images.length > 0 && (
+                      <div className="mt-4 grid gap-3 grid-cols-3">
+                        {images.map((image) => (
+                          <div
+                            key={image.fileId}
+                            className="group relative overflow-hidden border border-border-soft"
+                          >
+                            <img
+                              src={image.url}
+                              alt={image.name}
+                              className="h-20 w-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(image.fileId)}
+                              className="absolute right-2 top-2 rounded-full bg-charcoal/60 p-1 text-ivory opacity-0 transition group-hover:opacity-100"
+                              aria-label="Remove image"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Button type="submit" disabled={uploadingImages}>
-                  Create product
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+
+                <div className="flex flex-wrap gap-3 pt-4">
+                  <Button type="submit" disabled={uploadingImages}>
+                    Create Product
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCreateModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

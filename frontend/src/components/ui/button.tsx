@@ -4,35 +4,71 @@ import { cn } from "@/lib/utils";
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "outline";
 export type ButtonSize = "sm" | "md" | "lg";
 
+/**
+ * Premium Button Variants
+ * - Solid warm colors, no gradients
+ * - Heavy typography with letter-spacing
+ * - Subtle hover states
+ */
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-gradient-to-r from-rose-600 to-fuchsia-600 text-white shadow-lg shadow-rose-500/20 hover:from-rose-500 hover:to-fuchsia-500",
+    "bg-charcoal text-ivory hover:bg-brown dark:bg-gold dark:text-charcoal dark:hover:bg-gold-muted",
   secondary:
-    "bg-slate-900 text-white hover:bg-slate-800",
-  ghost: "bg-transparent hover:bg-slate-100 text-slate-900",
+    "bg-cream text-charcoal hover:bg-border-soft dark:bg-brown dark:text-ivory dark:hover:bg-brown-soft",
+  ghost:
+    "bg-transparent text-charcoal hover:bg-cream dark:text-ivory dark:hover:bg-brown/50",
   outline:
-    "border border-slate-200 bg-white hover:bg-slate-50 text-slate-900",
+    "border border-border-warm bg-transparent text-charcoal hover:bg-cream dark:border-border dark:text-ivory dark:hover:bg-brown/30",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-4 text-sm",
-  lg: "h-12 px-6 text-base",
+  sm: "h-10 px-5 text-xs",
+  md: "h-12 px-6 text-sm",
+  lg: "h-14 px-8 text-sm",
 };
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", ...props }, ref) => {
+  ({ className, variant = "primary", size = "md", asChild, ...props }, ref) => {
+    // Handle asChild pattern for Link components
+    if (asChild && React.isValidElement(props.children)) {
+      return React.cloneElement(props.children as React.ReactElement<any>, {
+        className: cn(
+          // Base styles
+          "inline-flex items-center justify-center gap-2 rounded-sm font-medium tracking-wide uppercase",
+          // Premium transition
+          "transition-all duration-400 ease-out",
+          // Focus ring - muted gold
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          // Disabled state
+          "disabled:pointer-events-none disabled:opacity-50",
+          variantClasses[variant],
+          sizeClasses[size],
+          className,
+          (props.children as React.ReactElement<any>).props.className
+        ),
+        ref,
+      });
+    }
+
     return (
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+          // Base styles
+          "inline-flex items-center justify-center gap-2 rounded-sm font-medium tracking-wide uppercase",
+          // Premium transition
+          "transition-all duration-400 ease-out",
+          // Focus ring - muted gold
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          // Disabled state
+          "disabled:pointer-events-none disabled:opacity-50",
           variantClasses[variant],
           sizeClasses[size],
           className

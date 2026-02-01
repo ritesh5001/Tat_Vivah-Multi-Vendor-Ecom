@@ -1,12 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { deleteProduct, getAllProducts } from "@/services/admin";
 import { getCategories } from "@/services/catalog";
 import { toast } from "sonner";
+
+const getProductStatusStyle = (product: any) => {
+  if (product.deletedByAdmin) {
+    return "border-[#A67575]/30 text-[#7A5656] bg-[#A67575]/5";
+  }
+  if (product.isPublished) {
+    return "border-[#7B9971]/30 text-[#5A7352] bg-[#7B9971]/5";
+  }
+  return "border-border-soft text-muted-foreground bg-cream/30";
+};
 
 export default function AdminProductsPage() {
   const [loading, setLoading] = React.useState(true);
@@ -78,86 +89,147 @@ export default function AdminProductsPage() {
   }, [products, searchQuery, categoryFilter]);
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-500">
-            All products
+    <div className="min-h-[calc(100vh-160px)] bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 lg:py-20"
+      >
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Catalog Moderation
           </p>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Manage every listing across sellers.
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Product Management
           </h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Review, flag, or remove listings across sellers with deliberate oversight.
+          </p>
         </div>
 
-        <Card className="border border-emerald-100/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-          <CardHeader>
-            <CardTitle className="text-lg text-slate-900 dark:text-white">
-              Products table
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center">
-              <Input
-                placeholder="Search by title, seller, or category"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-              />
-              <div className="flex items-center gap-3">
-                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Category
-                </label>
-                <select
-                  className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                  value={categoryFilter}
-                  onChange={(event) => setCategoryFilter(event.target.value)}
-                >
-                  <option value="all">All categories</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="border border-border-soft bg-card p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+          <div className="flex items-center gap-3 flex-1 max-w-md">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by title, seller, or category..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="border-0 bg-transparent focus-visible:ring-0 h-10"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <label className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Category
+            </label>
+            <select
+              className="h-10 border border-border-soft bg-card px-4 text-sm text-foreground transition focus:border-gold/50"
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+            >
+              <option value="all">All categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </motion.div>
+
+        {/* Products Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+          className="border border-border-soft bg-card"
+        >
+          <div className="border-b border-border-soft p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                  Catalog
+                </p>
+                <p className="font-serif text-lg font-light text-foreground">
+                  All Products
+                </p>
               </div>
+              <p className="text-sm text-muted-foreground">
+                {filteredProducts.length} listings
+              </p>
             </div>
+          </div>
+
+          <div className="overflow-x-auto">
             {loading ? (
-              <p className="text-sm text-slate-500">Loading products...</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">Loading products...</p>
+              </div>
             ) : filteredProducts.length === 0 ? (
-              <p className="text-sm text-slate-500">No products found.</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">No products found.</p>
+              </div>
             ) : (
-              <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-                <thead className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  <tr>
-                    <th className="py-3">Title</th>
-                    <th className="py-3">Seller</th>
-                    <th className="py-3">Category</th>
-                    <th className="py-3">Status</th>
-                    <th className="py-3">Moderation</th>
-                    <th className="py-3">Action</th>
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border-soft">
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Title
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Seller
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Category
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Moderation
+                    </th>
+                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Action
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800">
-                  {filteredProducts.map((product) => (
-                    <tr key={product.id}>
-                      <td className="py-3 font-semibold text-slate-900 dark:text-white">
+                <tbody className="divide-y divide-border-soft">
+                  {filteredProducts.map((product, index) => (
+                    <motion.tr
+                      key={product.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 + index * 0.02, duration: 0.3 }}
+                      className="hover:bg-cream/30 dark:hover:bg-brown/10 transition-colors duration-200"
+                    >
+                      <td className="p-6 font-medium text-foreground">
                         {product.title}
                       </td>
-                      <td className="py-3">
+                      <td className="p-6 text-muted-foreground">
                         {product.sellerEmail ?? product.sellerId?.slice(0, 8)}
                       </td>
-                      <td className="py-3">
+                      <td className="p-6 text-muted-foreground">
                         {product.categoryName ?? product.categoryId?.slice(0, 6)}
                       </td>
-                      <td className="py-3">
-                        {product.deletedByAdmin ? "Deleted" : product.isPublished ? "Published" : "Draft"}
+                      <td className="p-6">
+                        <span className={`px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider border ${getProductStatusStyle(product)}`}>
+                          {product.deletedByAdmin ? "Deleted" : product.isPublished ? "Published" : "Draft"}
+                        </span>
                       </td>
-                      <td className="py-3">
+                      <td className="p-6 text-sm text-muted-foreground">
                         {product.moderation?.status ?? "—"}
                       </td>
-                      <td className="py-3">
-                        <div className="flex flex-col gap-2">
+                      <td className="p-6">
+                        <div className="flex flex-col gap-2 min-w-[160px]">
                           <Input
-                            placeholder="Reason"
+                            placeholder="Reason for removal"
                             value={reasons[product.id] ?? ""}
                             onChange={(event) =>
                               setReasons((prev) => ({
@@ -165,25 +237,28 @@ export default function AdminProductsPage() {
                                 [product.id]: event.target.value,
                               }))
                             }
+                            className="h-9 text-xs"
+                            disabled={product.deletedByAdmin}
                           />
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(product.id)}
                             disabled={product.deletedByAdmin}
+                            className="h-9 text-muted-foreground hover:text-[#7A5656] hover:border-[#A67575]/40"
                           >
-                            {product.deletedByAdmin ? "Deleted" : "Delete"}
+                            {product.deletedByAdmin ? "Deleted" : "Remove"}
                           </Button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
