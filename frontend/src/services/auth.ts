@@ -44,6 +44,25 @@ export interface RegisterResponse {
   message: string;
 }
 
+export interface OtpRequestResponse {
+  message: string;
+}
+
+export interface VerifyOtpResponse {
+  message?: string;
+  user?: {
+    id: string;
+    email: string | null;
+    phone: string | null;
+    role: string;
+    status: string;
+    isEmailVerified?: boolean;
+    isPhoneVerified?: boolean;
+  };
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
@@ -146,4 +165,55 @@ export async function registerAdmin(
   }
 
   return data as RegisterResponse;
+}
+
+export async function requestEmailOtp(email: string): Promise<OtpRequestResponse> {
+  if (!API_BASE_URL) {
+    throw new Error("API base URL is not configured");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/v1/auth/request-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      data?.error?.message ?? data?.message ?? "OTP request failed";
+    throw new Error(message);
+  }
+
+  return data as OtpRequestResponse;
+}
+
+export async function verifyEmailOtp(payload: {
+  email: string;
+  otp: string;
+}): Promise<VerifyOtpResponse> {
+  if (!API_BASE_URL) {
+    throw new Error("API base URL is not configured");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/v1/auth/verify-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      data?.error?.message ?? data?.message ?? "OTP verification failed";
+    throw new Error(message);
+  }
+
+  return data as VerifyOtpResponse;
 }

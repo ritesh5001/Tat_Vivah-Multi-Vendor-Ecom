@@ -43,8 +43,8 @@ export default function SellerRegisterPage() {
     setLoading(true);
     try {
       await registerSeller({ email, phone, password });
-      toast.success("Seller registration submitted.");
-      window.location.href = "/login";
+      toast.success("OTP sent to your email.");
+      window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Signup failed");
     } finally {
