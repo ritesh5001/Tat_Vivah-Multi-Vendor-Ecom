@@ -129,3 +129,30 @@ export const logoutSchema = z.object({
 });
 
 export type LogoutInput = z.infer<typeof logoutSchema>;
+
+/**
+ * Request OTP Validation Schema
+ * POST /v1/auth/request-otp
+ */
+export const requestOtpSchema = z.object({
+    email: z
+        .string()
+        .email('Invalid email address'),
+});
+
+export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
+
+/**
+ * Verify OTP Validation Schema
+ * POST /v1/auth/verify-otp
+ */
+export const verifyOtpSchema = z.object({
+    email: z
+        .string()
+        .email('Invalid email address'),
+    otp: z
+        .string()
+        .min(4, 'OTP is required'),
+});
+
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;

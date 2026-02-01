@@ -24,6 +24,7 @@ model User {
   adminProfile       AdminProfile?
   audit_logs         AuditLog[]
   buyer_profiles     buyer_profiles?
+  email_otps         EmailOtp[]
   loginSessions      LoginSession[]
   product_moderation ProductModeration[]
   products           Product[]
@@ -535,6 +536,10 @@ enum ShipmentStatus {
   DELIVERED
 }
 
+enum OtpPurpose {
+  EMAIL_VERIFY
+}
+
 /// Notifications for users (Buyers, Sellers, Admins)
 model Notification {
   id        String             @id @default(cuid())
@@ -567,11 +572,29 @@ model NotificationEvent {
   @@map("notification_events")
 }
 
+model EmailOtp {
+  id        String     @id @default(cuid())
+  userId    String?    @map("user_id")
+  email     String
+  codeHash  String     @map("code_hash")
+  purpose   OtpPurpose @default(EMAIL_VERIFY)
+  expiresAt DateTime   @map("expires_at")
+  usedAt    DateTime?  @map("used_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  payload   Json?      @map("payload")
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@map("email_otps")
+}
+
 enum NotificationType {
   ORDER_PLACED
   ORDER_SHIPPED
   ORDER_DELIVERED
   SELLER_NEW_ORDER
+  SELLER_APPROVED
   SELLER_PRODUCT_REJECTED
   ADMIN_ALERT
 }

@@ -13,6 +13,7 @@ import {
     invalidateCache,
     invalidateProductCaches,
 } from '../utils/cache.util.js';
+import { notificationService } from '../notifications/notification.service.js';
 
 /**
  * Admin Service Class
@@ -53,6 +54,8 @@ export class AdminService {
 
         // Update status to ACTIVE
         const updatedSeller = await this.adminRepo.updateSellerStatus(sellerId, 'ACTIVE');
+
+        await notificationService.notifySellerApproved(updatedSeller.id, updatedSeller.email);
 
         // Log audit action
         await this.auditSvc.logAction(actorId, 'SELLER_APPROVED', 'USER', sellerId, {

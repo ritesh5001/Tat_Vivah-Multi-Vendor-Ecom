@@ -11,6 +11,7 @@ import { orderShippedTemplate } from './email/templates/order-shipped.js';
 import { orderDeliveredTemplate } from './email/templates/order-delivered.js';
 import { sellerNewOrderTemplate } from './email/templates/seller-new-order.js';
 import { adminAlertTemplate } from './email/templates/admin-alert.js';
+import { sellerApprovedTemplate } from './email/templates/seller-approved.js';
 
 if (!env.REDIS_URL) {
     console.warn('REDIS_URL is not set. Notification worker is disabled.');
@@ -70,6 +71,9 @@ export const notificationWorker = connection
                 break;
             case 'SELLER_NEW_ORDER':
                 emailData = sellerNewOrderTemplate(meta);
+                break;
+            case 'SELLER_APPROVED':
+                emailData = sellerApprovedTemplate(meta);
                 break;
             case 'ADMIN_ALERT':
                 emailData = adminAlertTemplate(meta);
