@@ -21,6 +21,7 @@ import {
     sellerShipmentRouter,
     adminShipmentRouter,
     adminNotificationRouter,
+    reviewRouter,
 } from './routes/index.js';
 import { notificationWorker } from './notifications/notification.worker.js';
 import { apiReference } from "@scalar/express-api-reference";
@@ -100,6 +101,9 @@ export function createApp(): Application {
     app.use('/v1/payments/webhook', webhookRouter); // Must be before /v1/payments to avoid auth middleware capture
     app.use('/v1/payments', paymentRouter);
     app.use('/v1/seller/settlements', sellerSettlementRouter);
+
+    // Reviews domain
+    app.use('/v1/reviews', reviewRouter);
 
     // Shipping & Fulfillment domain
     app.use('/v1/orders', shipmentRouter); // Mounts to /v1/orders/:orderId/tracking (extending order routes logic) - Wait, shipmentRouter base path is /v1/orders in file comment. Let's verify.

@@ -35,6 +35,7 @@ model User {
   user_addresses     user_addresses[]
   user_preferences   user_preferences?
   user_profiles      user_profiles?
+  reviews            Review[]
 
   @@map("users")
 }
@@ -119,22 +120,23 @@ model Category {
 
 /// Products owned by sellers
 model Product {
-  id          String             @id @default(cuid())
-  sellerId    String             @map("seller_id")
-  categoryId  String             @map("category_id")
-  title       String
-  description String?
-  isPublished Boolean            @default(false) @map("is_published")
-  deletedByAdmin Boolean          @default(false) @map("deleted_by_admin")
-  deletedByAdminAt DateTime?      @map("deleted_by_admin_at")
-  deletedByAdminReason String?    @map("deleted_by_admin_reason")
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
-  images      String[]           @default([]) @map("images")
-  moderation  ProductModeration?
-  variants    ProductVariant[]
-  category    Category           @relation(fields: [categoryId], references: [id])
-  seller      User               @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  id                   String             @id @default(cuid())
+  sellerId             String             @map("seller_id")
+  categoryId           String             @map("category_id")
+  title                String
+  description          String?
+  isPublished          Boolean            @default(false) @map("is_published")
+  deletedByAdmin       Boolean            @default(false) @map("deleted_by_admin")
+  deletedByAdminAt     DateTime?          @map("deleted_by_admin_at")
+  deletedByAdminReason String?            @map("deleted_by_admin_reason")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  images               String[]           @default([]) @map("images")
+  moderation           ProductModeration?
+  variants             ProductVariant[]
+  category             Category           @relation(fields: [categoryId], references: [id])
+  seller               User               @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  reviews              Review[]
 
   @@index([sellerId])
   @@index([categoryId])
@@ -196,22 +198,22 @@ model CartItem {
 
 /// Orders placed by buyers
 model Order {
-  id          String              @id @default(cuid())
-  userId      String              @map("user_id")
-  status      OrderStatus         @default(PLACED)
-  totalAmount Float               @map("total_amount")
-  shippingName String?             @map("shipping_name")
-  shippingPhone String?            @map("shipping_phone")
-  shippingEmail String?            @map("shipping_email")
-  shippingAddressLine1 String?     @map("shipping_address_line_1")
-  shippingAddressLine2 String?     @map("shipping_address_line_2")
-  shippingCity String?             @map("shipping_city")
-  shippingNotes String?            @map("shipping_notes")
-  createdAt   DateTime            @default(now()) @map("created_at")
-  movements   InventoryMovement[]
-  items       OrderItem[]
-  payment     Payment?
-  shipments   shipments[]
+  id                   String              @id @default(cuid())
+  userId               String              @map("user_id")
+  status               OrderStatus         @default(PLACED)
+  totalAmount          Float               @map("total_amount")
+  shippingName         String?             @map("shipping_name")
+  shippingPhone        String?             @map("shipping_phone")
+  shippingEmail        String?             @map("shipping_email")
+  shippingAddressLine1 String?             @map("shipping_address_line_1")
+  shippingAddressLine2 String?             @map("shipping_address_line_2")
+  shippingCity         String?             @map("shipping_city")
+  shippingNotes        String?             @map("shipping_notes")
+  createdAt            DateTime            @default(now()) @map("created_at")
+  movements            InventoryMovement[]
+  items                OrderItem[]
+  payment              Payment?
+  shipments            shipments[]
 
   @@index([userId])
   @@map("orders")
@@ -257,9 +259,9 @@ model Payment {
   currency          String          @default("INR")
   status            PaymentStatus   @default(INITIATED)
   provider          PaymentProvider @default(MOCK)
-  providerOrderId   String?         @map("provider_order_id")   // Razorpay order_id
+  providerOrderId   String?         @map("provider_order_id") // Razorpay order_id
   providerPaymentId String?         @map("provider_payment_id") // Razorpay payment_id
-  providerSignature String?         @map("provider_signature")  // Razorpay signature for audit
+  providerSignature String?         @map("provider_signature") // Razorpay signature for audit
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
   events            PaymentEvent[]
@@ -542,8 +544,8 @@ enum OtpPurpose {
 
 /// Notifications for users (Buyers, Sellers, Admins)
 model Notification {
-  id        String             @id @default(cuid())
-  userId    String?            @map("user_id")
+  id        String              @id @default(cuid())
+  userId    String?             @map("user_id")
   role      Role?
   type      NotificationType
   channel   NotificationChannel
@@ -551,8 +553,8 @@ model Notification {
   subject   String?
   content   String
   metadata  Json?
-  createdAt DateTime           @default(now()) @map("created_at")
-  sentAt    DateTime?          @map("sent_at")
+  createdAt DateTime            @default(now()) @map("created_at")
+  sentAt    DateTime?           @map("sent_at")
 
   @@index([userId])
   @@index([status])
@@ -560,13 +562,13 @@ model Notification {
 }
 
 model NotificationEvent {
-  id                 String             @id @default(cuid())
-  notificationId     String             @map("notification_id")
-  provider           String
-  providerMessageId  String?            @map("provider_message_id")
-  status             NotificationStatus
-  error              String?
-  createdAt          DateTime           @default(now()) @map("created_at")
+  id                String             @id @default(cuid())
+  notificationId    String             @map("notification_id")
+  provider          String
+  providerMessageId String?            @map("provider_message_id")
+  status            NotificationStatus
+  error             String?
+  createdAt         DateTime           @default(now()) @map("created_at")
 
   @@index([notificationId])
   @@map("notification_events")
@@ -607,4 +609,23 @@ enum NotificationStatus {
   PENDING
   SENT
   FAILED
+}
+
+/// Reviews for products
+model Review {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  userId    String   @map("user_id")
+  rating    Int
+  text      String
+  images    String[] @default([])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+  @@map("reviews")
 }
