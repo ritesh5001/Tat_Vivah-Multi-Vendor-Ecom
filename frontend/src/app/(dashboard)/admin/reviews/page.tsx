@@ -4,22 +4,22 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { approveProduct, getPendingProducts, rejectProduct } from "@/services/admin";
+import { deleteAdminReview, getAdminReviews } from "@/services/admin";
 import { toast } from "sonner";
 
 export default function AdminReviewsPage() {
   const [loading, setLoading] = React.useState(true);
-  const [products, setProducts] = React.useState<Array<any>>([]);
-  const [reasons, setReasons] = React.useState<Record<string, string>>({});
+  const [reviews, setReviews] = React.useState<Array<any>>([]);
+  const [query, setQuery] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getPendingProducts();
-      setProducts(result.products ?? []);
+      const result = await getAdminReviews();
+      setReviews(result.reviews ?? []);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Unable to load pending products"
+        error instanceof Error ? error.message : "Unable to load reviews"
       );
     } finally {
       setLoading(false);
@@ -30,35 +30,37 @@ export default function AdminReviewsPage() {
     load();
   }, [load]);
 
-  const handleApprove = async (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
-      await approveProduct(id);
-      toast.success("Product approved.");
+      await deleteAdminReview(id);
+      toast.success("Review deleted.");
       load();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Unable to approve product"
+        error instanceof Error ? error.message : "Unable to delete review"
       );
     }
   };
 
-  const handleReject = async (id: string) => {
-    const reason = reasons[id] ?? "";
-    if (!reason.trim()) {
-      toast.error("Add a rejection reason.");
-      return;
-    }
-    try {
-      await rejectProduct(id, reason);
-      toast.success("Product rejected.");
-      setReasons((prev) => ({ ...prev, [id]: "" }));
-      load();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Unable to reject product"
-      );
-    }
-  };
+  const filteredReviews = React.useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return reviews;
+
+    return reviews.filter((review) => {
+      const haystack = [
+        review.product?.title,
+        review.user?.email,
+        review.user?.fullName,
+        review.text,
+        review.rating?.toString(),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(needle);
+    });
+  }, [reviews, query]);
 
   return (
     <div className="min-h-[calc(100vh-160px)] bg-background">
@@ -71,83 +73,80 @@ export default function AdminReviewsPage() {
         {/* Header */}
         <div className="space-y-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
-            Product Moderation
+            Customer Feedback
           </p>
           <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
-            Compliance Reviews
+            Reviews
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Approve or reject products pending moderation with deliberate oversight.
+            Monitor product reviews, spot trends, and remove harmful content.
           </p>
         </div>
 
-        {/* Pending Products */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="border border-border-soft bg-card p-4 flex items-center gap-3"
+        >
+          <Input
+            placeholder="Search by product, user, rating, or review text..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="border-0 bg-transparent focus-visible:ring-0 h-10"
+          />
+        </motion.div>
+
         <section className="space-y-6">
           {loading ? (
             <div className="border border-border-soft bg-card p-12 text-center">
-              <p className="text-sm text-muted-foreground">Loading products...</p>
+              <p className="text-sm text-muted-foreground">Loading reviews...</p>
             </div>
-          ) : products.length === 0 ? (
+          ) : filteredReviews.length === 0 ? (
             <div className="border border-border-soft bg-card p-12 text-center space-y-2">
               <p className="font-serif text-lg font-light text-foreground">
-                All Clear
+                No reviews found
               </p>
               <p className="text-sm text-muted-foreground">
-                No products pending moderation.
+                Try a different search keyword.
               </p>
             </div>
           ) : (
-            products.map((product, index) => (
+            filteredReviews.map((review, index) => (
               <motion.div
-                key={product.id}
+                key={review.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.05, duration: 0.5 }}
+                transition={{ delay: 0.1 + index * 0.04, duration: 0.5 }}
                 className="border border-border-soft bg-card"
               >
-                {/* Product Header */}
-                <div className="flex items-center justify-between gap-4 p-6 border-b border-border-soft">
+                <div className="flex flex-col gap-4 border-b border-border-soft p-6 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
                     <p className="font-serif text-lg font-normal text-foreground">
-                      {product.title}
+                      {review.product?.title ?? "Unknown product"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {product.categoryName ?? "Uncategorized"} · Seller: {product.sellerEmail ?? product.sellerId?.slice(0, 8)}
+                      {review.user?.fullName ?? "Anonymous"} · {review.user?.email ?? "No email"}
                     </p>
                   </div>
                   <span className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider border border-[#B8956C]/30 text-[#8A7054] bg-[#B8956C]/5">
-                    {product.moderation?.status ?? "PENDING"}
+                    {review.rating} ★
                   </span>
                 </div>
-
-                {/* Action Area */}
                 <div className="p-6 space-y-4">
-                  <Input
-                    placeholder="Reason for rejection (required to reject)"
-                    value={reasons[product.id] ?? ""}
-                    onChange={(event) =>
-                      setReasons((prev) => ({
-                        ...prev,
-                        [product.id]: event.target.value,
-                      }))
-                    }
-                    className="h-12"
-                  />
-                  <div className="flex gap-3">
-                    <Button
-                      size="sm"
-                      onClick={() => handleApprove(product.id)}
-                      className="h-10 px-6"
-                    >
-                      Approve
-                    </Button>
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {review.text}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(review.createdAt).toLocaleString()}
+                    </p>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleReject(product.id)}
-                      className="h-10 px-6 text-muted-foreground hover:text-[#7A5656] hover:border-[#A67575]/40"
+                      onClick={() => handleDelete(review.id)}
                     >
-                      Reject
+                      Delete Review
                     </Button>
                   </div>
                 </div>

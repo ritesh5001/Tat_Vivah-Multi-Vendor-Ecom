@@ -132,7 +132,7 @@ export default function AdminProfilePage() {
                   </Button>
                 </motion.div>
               </Link>
-              <Link href="/admin/reviews">
+              <Link href="/admin/products">
                 <motion.div
                   whileHover={{ y: -2 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
