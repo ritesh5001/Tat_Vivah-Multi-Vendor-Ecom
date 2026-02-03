@@ -7,6 +7,15 @@ import type { CategoryEntity } from '../types/product.types.js';
  */
 export class CategoryRepository {
     /**
+     * Find all categories (active + inactive)
+     */
+    async findAll(): Promise<CategoryEntity[]> {
+        return prisma.category.findMany({
+            orderBy: { name: 'asc' },
+        });
+    }
+
+    /**
      * Find all active categories
      */
     async findAllActive(): Promise<CategoryEntity[]> {
@@ -43,6 +52,36 @@ export class CategoryRepository {
             select: { id: true },
         });
         return category !== null;
+    }
+
+    /**
+     * Create category
+     */
+    async create(data: { name: string; slug: string }): Promise<CategoryEntity> {
+        return prisma.category.create({
+            data: {
+                name: data.name,
+                slug: data.slug,
+                isActive: true,
+            },
+        });
+    }
+
+    /**
+     * Update category
+     */
+    async update(
+        id: string,
+        data: { name?: string; slug?: string; isActive?: boolean }
+    ): Promise<CategoryEntity> {
+        return prisma.category.update({
+            where: { id },
+            data: {
+                ...(data.name !== undefined && { name: data.name }),
+                ...(data.slug !== undefined && { slug: data.slug }),
+                ...(data.isActive !== undefined && { isActive: data.isActive }),
+            },
+        });
     }
 }
 

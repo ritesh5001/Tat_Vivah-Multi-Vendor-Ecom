@@ -48,20 +48,6 @@ adminRouter.put(
     adminController.suspendSeller
 );
 
-// ============================================================================
-// PRODUCT MODERATION (ADMIN + SUPER_ADMIN)
-// ============================================================================
-
-/**
- * GET /v1/admin/products/pending
- * List products pending moderation
- */
-adminRouter.get(
-    '/products/pending',
-    authorize('ADMIN', 'SUPER_ADMIN'),
-    adminController.listPendingProducts
-);
-
 /**
  * GET /v1/admin/products
  * List all products
@@ -73,26 +59,6 @@ adminRouter.get(
 );
 
 /**
- * PUT /v1/admin/products/:id/approve
- * Approve a product
- */
-adminRouter.put(
-    '/products/:id/approve',
-    authorize('ADMIN', 'SUPER_ADMIN'),
-    adminController.approveProduct
-);
-
-/**
- * PUT /v1/admin/products/:id/reject
- * Reject a product
- */
-adminRouter.put(
-    '/products/:id/reject',
-    authorize('ADMIN', 'SUPER_ADMIN'),
-    adminController.rejectProduct
-);
-
-/**
  * DELETE /v1/admin/products/:id
  * Delete a product (soft delete)
  */
@@ -100,6 +66,118 @@ adminRouter.delete(
     '/products/:id',
     authorize('ADMIN', 'SUPER_ADMIN'),
     adminController.deleteProduct
+);
+
+// ============================================================================
+// CATEGORY MANAGEMENT (ADMIN + SUPER_ADMIN)
+// ============================================================================
+
+/**
+ * GET /v1/admin/categories
+ * List all categories
+ */
+adminRouter.get(
+    '/categories',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.listCategories
+);
+
+/**
+ * POST /v1/admin/categories
+ * Create category
+ */
+adminRouter.post(
+    '/categories',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.createCategory
+);
+
+/**
+ * PUT /v1/admin/categories/:id
+ * Update category
+ */
+adminRouter.put(
+    '/categories/:id',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.updateCategory
+);
+
+/**
+ * DELETE /v1/admin/categories/:id
+ * Deactivate category
+ */
+adminRouter.delete(
+    '/categories/:id',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.deleteCategory
+);
+
+// ============================================================================
+// BESTSELLER MANAGEMENT (ADMIN + SUPER_ADMIN)
+// ============================================================================
+
+/**
+ * GET /v1/admin/bestsellers
+ * List all bestsellers (admin view)
+ */
+adminRouter.get(
+    '/bestsellers',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.listBestsellers
+);
+
+/**
+ * POST /v1/admin/bestsellers
+ * Create a bestseller entry
+ */
+adminRouter.post(
+    '/bestsellers',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.createBestseller
+);
+
+/**
+ * PUT /v1/admin/bestsellers/:id
+ * Update a bestseller entry
+ */
+adminRouter.put(
+    '/bestsellers/:id',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.updateBestseller
+);
+
+/**
+ * DELETE /v1/admin/bestsellers/:id
+ * Delete a bestseller entry
+ */
+adminRouter.delete(
+    '/bestsellers/:id',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.deleteBestseller
+);
+
+// ============================================================================
+// REVIEWS MANAGEMENT (ADMIN + SUPER_ADMIN)
+// ============================================================================
+
+/**
+ * GET /v1/admin/reviews
+ * List all reviews
+ */
+adminRouter.get(
+    '/reviews',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.listReviews
+);
+
+/**
+ * DELETE /v1/admin/reviews/:id
+ * Delete review
+ */
+adminRouter.delete(
+    '/reviews/:id',
+    authorize('ADMIN', 'SUPER_ADMIN'),
+    adminController.deleteReview
 );
 
 // ============================================================================
