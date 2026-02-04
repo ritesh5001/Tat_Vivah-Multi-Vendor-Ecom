@@ -14,6 +14,7 @@ import {
     invalidateProductCaches,
 } from '../utils/cache.util.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { bestsellerService } from './bestseller.service.js';
 
 /**
  * Admin Service Class
@@ -195,19 +196,13 @@ export class AdminService {
             throw ApiError.notFound('Product not found');
         }
 
-        await this.adminRepo.updateProductModeration(
-            productId,
-            'REJECTED',
-            actorId,
-            reason ?? 'Deleted by admin'
-        );
-
         const deleted = await this.adminRepo.markProductDeletedByAdmin(
             productId,
             reason
         );
 
         await invalidateProductCaches(productId);
+        await bestsellerService.removeByProductId(productId);
 
         await this.auditSvc.logAction(actorId, 'PRODUCT_DELETED', 'PRODUCT', productId, {
             productTitle: product.title,

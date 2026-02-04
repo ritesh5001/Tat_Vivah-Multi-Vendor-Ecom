@@ -6,7 +6,6 @@ const protectedRoutes = [
   "/admin",
   "/user",
   "/profile",
-  "/cart",
   "/checkout"
 ];
 
@@ -65,7 +64,6 @@ export const config = {
     "/profile/:path*",
     "/login",
     "/register/:path*",
-    "/cart",
     "/checkout"
   ],
 };

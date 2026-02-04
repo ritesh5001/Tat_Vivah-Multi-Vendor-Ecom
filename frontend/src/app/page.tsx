@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -12,8 +13,58 @@ import {
 } from "@/lib/motion.config";
 import { ReviewSection } from "@/components/review-section";
 import { FeaturesMarquee } from "@/components/features-marquee";
+import { getBestsellers } from "@/services/bestsellers";
 
 export default function Home() {
+  const [bestsellers, setBestsellers] = React.useState<
+    Array<{
+      id: string;
+      productId: string;
+      position: number;
+      title: string;
+      image?: string | null;
+      categoryName?: string | null;
+      minPrice?: number | null;
+    }>
+  >([]);
+  const [loadingBestsellers, setLoadingBestsellers] = React.useState(true);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const load = async () => {
+      try {
+        const response = await getBestsellers(4);
+        if (isMounted) {
+          setBestsellers(response.products ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setBestsellers([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingBestsellers(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatPrice = (price?: number | null) => {
+    if (!price && price !== 0) return "Contact for price";
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
   return (
     <div className="min-h-[calc(100vh-160px)] bg-background">
       {/* =========================================================================
@@ -21,6 +72,7 @@ export default function Home() {
           ========================================================================= */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         {/* Subtle background pattern */}
+
         <div className="absolute inset-0 opacity-30">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(184,149,108,0.08),transparent_50%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(184,149,108,0.05),transparent_50%)]" />
@@ -147,18 +199,39 @@ export default function Home() {
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
             {[
-              { name: "Wedding Sherwanis", desc: "Regal attire for the groom" },
-              { name: "Ethnic Kurtas", desc: "Traditional elegance" },
-              { name: "Bandhgalas", desc: "Sophisticated formal wear" },
-              { name: "Accessories", desc: "Complete the look" },
+              {
+                name: "Wedding Sherwanis",
+                desc: "Regal attire for the groom",
+                image: "/SherwaniTatvivah.jpg",
+              },
+              {
+                name: "Ethnic Kurtas",
+                desc: "Traditional elegance",
+                image: "/EthanicKurtaTatvivah.jpg",
+              },
+              {
+                name: "Indo Western",
+                desc: "Modern heritage fusion",
+                image: "/IndoWesternTatvivah.jpg",
+              },
+              {
+                name: "Accessories",
+                desc: "Complete the look",
+                image: "/Accesories.jpg",
+              },
             ].map((category) => (
               <motion.div key={category.name} variants={staggerItemVariants}>
                 <Link
                   href="/marketplace"
                   className="group block border border-border-soft bg-card p-8 transition-all duration-400 hover:translate-y-[-2px] hover:border-gold/30 hover:shadow-[0_4px_20px_rgba(44,40,37,0.06)]"
                 >
-                  {/* Placeholder for category image */}
-                  <div className="mb-6 h-48 bg-cream dark:bg-brown/20 transition-colors duration-400 group-hover:bg-ivory dark:group-hover:bg-brown/30" />
+                  <div className="mb-6 h-48 overflow-hidden bg-cream dark:bg-brown/20 transition-colors duration-400 group-hover:bg-ivory dark:group-hover:bg-brown/30">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
                   <h3 className="font-serif text-lg font-normal text-foreground mb-1">
                     {category.name}
                   </h3>
@@ -224,40 +297,50 @@ export default function Home() {
             variants={staggerContainerVariants}
             className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
           >
-            {[
-              { title: "Royal Silk Sherwani", price: "₹48,500", tag: "Bestseller" },
-              { title: "Banarasi Brocade Kurta", price: "₹12,900", tag: "New" },
-              { title: "Jodhpuri Bandhgala", price: "₹28,500", tag: "Popular" },
-              { title: "Lucknowi Chikan Set", price: "₹15,800", tag: "Artisan" },
-            ].map((item) => (
-              <motion.div key={item.title} variants={staggerItemVariants}>
-                <Link
-                  href="/marketplace"
-                  className="group block"
-                >
-                  {/* Product Image */}
-                  <div className="relative mb-5 overflow-hidden bg-cream dark:bg-brown/20 aspect-[3/4]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">
-                        Image
+            {loadingBestsellers ? (
+              <div className="col-span-full rounded-md border border-border-soft bg-card p-10 text-center text-sm text-muted-foreground">
+                Loading bestsellers...
+              </div>
+            ) : bestsellers.length === 0 ? (
+              <div className="col-span-full rounded-md border border-border-soft bg-card p-10 text-center text-sm text-muted-foreground">
+                No bestsellers available yet.
+              </div>
+            ) : (
+              bestsellers.map((item) => (
+                <motion.div key={item.id} variants={staggerItemVariants}>
+                  <Link href="/marketplace" className="group block">
+                    {/* Product Image */}
+                    <div className="relative mb-5 overflow-hidden bg-cream dark:bg-brown/20 aspect-[3/4]">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">
+                            Image
+                          </span>
+                        </div>
+                      )}
+                      {/* Tag */}
+                      <span className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground border border-border-soft">
+                        Bestseller
                       </span>
                     </div>
-                    {/* Tag */}
-                    <span className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground border border-border-soft">
-                      {item.tag}
-                    </span>
-                  </div>
 
-                  {/* Product Info */}
-                  <h3 className="font-serif text-base font-normal text-foreground mb-1 group-hover:text-gold transition-colors duration-300">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {item.price}
-                  </p>
-                </Link>
-              </motion.div>
-            ))}
+                    {/* Product Info */}
+                    <h3 className="font-serif text-base font-normal text-foreground mb-1 group-hover:text-gold transition-colors duration-300">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {formatPrice(item.minPrice)}
+                    </p>
+                  </Link>
+                </motion.div>
+              ))
+            )}
           </motion.div>
         </div>
       </section>
