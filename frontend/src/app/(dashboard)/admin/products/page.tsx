@@ -99,13 +99,13 @@ export default function AdminProductsPage() {
         {/* Header */}
         <div className="space-y-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
-            Catalog Moderation
+            Catalog Control
           </p>
           <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
             Product Management
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Review, flag, or remove listings across sellers with deliberate oversight.
+            Sellers can publish instantly. Use admin controls to remove listings if needed.
           </p>
         </div>
 
@@ -193,9 +193,6 @@ export default function AdminProductsPage() {
                       Status
                     </th>
                     <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                      Moderation
-                    </th>
-                    <th className="p-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
                       Action
                     </th>
                   </tr>
@@ -222,9 +219,6 @@ export default function AdminProductsPage() {
                         <span className={`px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider border ${getProductStatusStyle(product)}`}>
                           {product.deletedByAdmin ? "Deleted" : product.isPublished ? "Published" : "Draft"}
                         </span>
-                      </td>
-                      <td className="p-6 text-sm text-muted-foreground">
-                        {product.moderation?.status ?? "—"}
                       </td>
                       <td className="p-6">
                         <div className="flex flex-col gap-2 min-w-[160px]">

@@ -17,6 +17,7 @@ const currency = new Intl.NumberFormat("en-IN", {
 export default function CartPage() {
   const router = useRouter();
   const [loading, setLoading] = React.useState(true);
+  const [canLoad, setCanLoad] = React.useState(false);
   const [cart, setCart] = React.useState<
     { items: Array<any> } | null
   >(null);
@@ -27,16 +28,49 @@ export default function CartPage() {
       const result = await getCart();
       setCart(result.cart);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to load cart");
+      const message = error instanceof Error ? error.message : "Unable to load cart";
+      if (/access token required|unauthorized|authentication/i.test(message)) {
+        toast.error("Please sign in to view your cart.");
+        router.push("/login?force=1");
+        return;
+      }
+      toast.error(message);
       setCart(null);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   React.useEffect(() => {
-    loadCart();
-  }, [loadCart]);
+    const getCookie = (name: string) => {
+      const match = document.cookie.match(
+        new RegExp(`(?:^|; )${name.replace(/([.$?*|{}()\[\]\\/+^])/g, "\\$1")}=([^;]*)`)
+      );
+      return match ? decodeURIComponent(match[1]) : undefined;
+    };
+
+    const token = getCookie("tatvivah_access");
+    if (!token) {
+      toast.error("Please sign in to view your cart.");
+      router.push("/login?force=1");
+      return;
+    }
+
+    const role = getCookie("tatvivah_role")?.toUpperCase();
+    if (role && role !== "USER") {
+      toast.error("Cart is available for customers only.");
+      router.push("/marketplace");
+      return;
+    }
+
+    setCanLoad(true);
+  }, [router]);
+
+  React.useEffect(() => {
+    if (canLoad) {
+      loadCart();
+    }
+  }, [canLoad, loadCart]);
 
   const handleQuantity = async (itemId: string, nextQty: number) => {
     if (nextQty <= 0) {

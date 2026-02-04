@@ -8,6 +8,7 @@ import {
     productRouter,
     sellerProductRouter,
     imagekitRouter,
+    bestsellerRouter,
     cartRouter,
     checkoutRouter,
     orderRouter,
@@ -90,6 +91,7 @@ export function createApp(): Application {
     app.use('/v1/products', productRouter);
     app.use('/v1/seller/products', sellerProductRouter);
     app.use('/v1/imagekit', imagekitRouter);
+    app.use('/v1/bestsellers', bestsellerRouter);
 
     // Cart & Orders domain
     app.use('/v1/cart', cartRouter);

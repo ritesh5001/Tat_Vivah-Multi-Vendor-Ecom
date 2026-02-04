@@ -10,7 +10,6 @@ import {
   getAllProducts,
   getOrders,
   getPayments,
-  getPendingProducts,
   getSellers,
 } from "@/services/admin";
 import { toast } from "sonner";
@@ -32,7 +31,6 @@ export default function AdminOverviewPage() {
   const [stats, setStats] = React.useState({
     sellers: 0,
     products: 0,
-    pendingProducts: 0,
     orders: 0,
     payments: 0,
   });
@@ -42,18 +40,16 @@ export default function AdminOverviewPage() {
   React.useEffect(() => {
     const load = async () => {
       try {
-        const [sellerRes, productsRes, pendingRes, ordersRes, paymentsRes] =
+        const [sellerRes, productsRes, ordersRes, paymentsRes] =
           await Promise.all([
             getSellers(),
             getAllProducts(),
-            getPendingProducts(),
             getOrders(),
             getPayments(),
           ]);
         setStats({
           sellers: sellerRes.sellers?.length ?? 0,
           products: productsRes.products?.length ?? 0,
-          pendingProducts: pendingRes.products?.length ?? 0,
           orders: ordersRes.orders?.length ?? 0,
           payments: paymentsRes.payments?.length ?? 0,
         });
@@ -71,15 +67,14 @@ export default function AdminOverviewPage() {
   const highlights = [
     { label: "Verified Sellers", value: String(stats.sellers), description: "Active on platform" },
     { label: "Listed Products", value: String(stats.products), description: "In catalog" },
-    { label: "Pending Reviews", value: String(stats.pendingProducts), description: "Awaiting approval" },
     { label: "Total Orders", value: String(stats.orders), description: "Processed" },
     { label: "Payments", value: String(stats.payments), description: "Transactions" },
   ];
 
   const complianceItems = [
-    { label: "Seller KYC pending", count: 18 },
-    { label: "Disputed products", count: 5 },
-    { label: "Fulfillment audit items", count: 3 },
+    { label: "Auto-publish enabled", count: "Live" },
+    { label: "Admin removals", count: "Manual" },
+    { label: "Customer reviews", count: "Monitored" },
   ];
 
   return (
@@ -104,7 +99,7 @@ export default function AdminOverviewPage() {
         </div>
 
         {/* Stats Grid - Platform Insights */}
-        <section className="grid gap-px bg-border-soft sm:grid-cols-2 lg:grid-cols-5">
+        <section className="grid gap-px bg-border-soft sm:grid-cols-2 lg:grid-cols-4">
           {highlights.map((item, index) => (
             <motion.div
               key={item.label}
@@ -147,7 +142,7 @@ export default function AdminOverviewPage() {
                 </p>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link href="/admin/reviews">Review All</Link>
+                <Link href="/admin/products">Review Catalog</Link>
               </Button>
             </div>
             <div className="divide-y divide-border-soft">
@@ -211,6 +206,16 @@ export default function AdminOverviewPage() {
                   className="flex items-center justify-between py-3 px-4 border border-border-soft text-sm text-foreground transition-all duration-300 hover:border-gold/50 hover:bg-cream/50 dark:hover:bg-brown/20"
                 >
                   <span>Send Audit</span>
+                  <span className="text-muted-foreground">→</span>
+                </motion.div>
+              </Link>
+              <Link href="/admin/bestsellers">
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="flex items-center justify-between py-3 px-4 border border-border-soft text-sm text-foreground transition-all duration-300 hover:border-gold/50 hover:bg-cream/50 dark:hover:bg-brown/20"
+                >
+                  <span>Manage Bestsellers</span>
                   <span className="text-muted-foreground">→</span>
                 </motion.div>
               </Link>

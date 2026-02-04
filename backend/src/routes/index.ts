@@ -10,6 +10,7 @@ export { productRouter } from './product.routes.js';
 export { sellerProductRouter } from './seller-product.routes.js';
 export { reviewRouter } from './review.routes.js';
 export { imagekitRouter } from './imagekit.routes.js';
+export { bestsellerRouter } from './bestseller.routes.js';
 
 
 // Cart & Orders domain
