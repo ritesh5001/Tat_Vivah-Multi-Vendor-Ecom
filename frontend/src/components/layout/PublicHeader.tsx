@@ -45,9 +45,9 @@ function SearchForm({ className }: { className?: string }) {
 }
 
 export function PublicHeader() {
-  const { user, token, loading } = useAuth();
+  const { user, loading, isSignedIn } = useAuth();
   const role = (user?.role ?? "USER").toUpperCase();
-  const isSignedIn = Boolean(token);
+  
   const accountHref = isSignedIn ? getRoleDashboardUrl(role) : "/login";
   const accountLabel = isSignedIn
     ? role === "USER"

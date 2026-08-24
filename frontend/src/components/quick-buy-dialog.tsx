@@ -18,6 +18,7 @@ import {
 } from "@/lib/checkout-snapshot";
 import { normalizeHex } from "@/lib/color-swatches";
 import { loginUrlWithReturn } from "@/lib/login-redirect";
+import { hasSession } from "@/lib/session";
 import { startNavigationFeedback } from "@/lib/navigation-feedback";
 import { buildSizeOptions } from "@/lib/variant-attributes";
 
@@ -31,11 +32,7 @@ const currency = new Intl.NumberFormat("en-IN", {
 
 const inStock = (variant: CatalogVariant) => (variant.inventory?.stock ?? 0) > 0;
 
-/** True when the browser holds either auth cookie. Mirrors product-detail-client. */
-function hasAuthSession(): boolean {
-    if (typeof document === "undefined") return false;
-    return /(?:^|; )tatvivah_(access|refresh)=[^;]/.test(document.cookie);
-}
+
 
 /**
  * Add to cart without leaving the grid.
@@ -160,7 +157,7 @@ export function QuickBuyDialog({
     const handleConfirm = () => {
         if (!productId || !selectedVariant) return;
 
-        if (!hasAuthSession()) {
+        if (!hasSession()) {
             onClose();
             toast.error("Please sign in to add items to cart.");
             startNavigationFeedback();

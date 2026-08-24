@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { startNavigationFeedback } from "@/lib/navigation-feedback";
 import { persistCheckoutCartSnapshot } from "@/lib/checkout-snapshot";
 import { loginUrlWithReturn } from "@/lib/login-redirect";
+import { hasSession } from "@/lib/session";
 
 const currency = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -76,8 +77,11 @@ export default function CartPage() {
       return match ? decodeURIComponent(match[1]) : undefined;
     };
 
-    const token = getCookie("tatvivah_access");
-    if (!token) {
+    // Gate on the shared session check, not on the access cookie alone. An
+    // expired access token with a live refresh token is still a session, and
+    // demanding the access cookie here bounced signed-in buyers to a login page
+    // that immediately considered them signed in again.
+    if (!hasSession()) {
       toast.error("Please sign in to view your cart.");
       startNavigationFeedback();
       router.push(loginUrlWithReturn());

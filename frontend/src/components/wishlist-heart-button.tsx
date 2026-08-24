@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { toggleWishlistItem, checkWishlistItems } from "@/services/wishlist";
 import { startNavigationFeedback } from "@/lib/navigation-feedback";
 import { loginUrlWithReturn } from "@/lib/login-redirect";
+import { hasSession } from "@/lib/session";
 
 interface WishlistHeartButtonProps {
   productId: string;
@@ -28,15 +29,10 @@ export function WishlistHeartButton({
   const [wishlisted, setWishlisted] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
 
-  // Either auth cookie counts: an expired access cookie with a live refresh
-  // cookie is still a valid session (apiRequest refreshes it silently).
-  const hasAuthSession = () =>
-    typeof document !== "undefined" &&
-    /(?:^|; )tatvivah_(access|refresh)=[^;]/.test(document.cookie);
 
   React.useEffect(() => {
     let cancelled = false;
-    if (!hasAuthSession()) return;
+    if (!hasSession()) return;
     checkWishlistItems([productId])
       .then((res) => {
         if (!cancelled) setWishlisted(res.wishlisted.includes(productId));
@@ -51,7 +47,7 @@ export function WishlistHeartButton({
     e.preventDefault(); // prevents navigation on card Link
     e.stopPropagation();
 
-    if (!hasAuthSession()) {
+    if (!hasSession()) {
       toast.error("Please sign in to save items.");
       startNavigationFeedback();
       router.push(loginUrlWithReturn());

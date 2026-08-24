@@ -16,6 +16,7 @@ import {
 } from "@/lib/checkout-snapshot";
 import { trackPendingCartWrite } from "@/lib/pending-cart";
 import { loginUrlWithReturn } from "@/lib/login-redirect";
+import { getSessionRole, hasSession } from "@/lib/session";
 import { normalizeHex } from "@/lib/color-swatches";
 import { buildSizeOptions } from "@/lib/variant-attributes";
 
@@ -146,15 +147,7 @@ function pickDefaultVariant(variants: Variant[]): Variant | undefined {
   return (options.find((option) => option.inStock) ?? options[0])?.variant ?? variants[0];
 }
 
-/**
- * True when the browser holds either auth cookie. The access cookie expires
- * daily, but a valid refresh cookie (7 days) lets apiRequest restore the
- * session silently — so only a missing refresh cookie means "signed out".
- */
-function hasAuthSession(): boolean {
-  if (typeof document === "undefined") return false;
-  return /(?:^|; )tatvivah_(access|refresh)=[^;]/.test(document.cookie);
-}
+
 
 export default function ProductDetailClient({
   product,
@@ -317,7 +310,7 @@ export default function ProductDetailClient({
       return;
     }
 
-    if (!hasAuthSession()) {
+    if (!hasSession()) {
       toast.error("Please sign in to add items to cart.");
       startNavigationFeedback();
       router.push(loginUrlWithReturn());
@@ -373,7 +366,7 @@ export default function ProductDetailClient({
       return;
     }
 
-    if (!hasAuthSession()) {
+    if (!hasSession()) {
       toast.error("Please sign in to continue.");
       startNavigationFeedback();
       router.push(loginUrlWithReturn());
@@ -461,11 +454,9 @@ export default function ProductDetailClient({
   };
 
   const handleOpenBooking = () => {
-    const roleMatch = document.cookie.match(/(?:^|; )tatvivah_role=([^;]*)/);
-    const role = roleMatch ? decodeURIComponent(roleMatch[1]).toUpperCase() : "";
-    const hasToken = document.cookie.match(/(?:^|; )tatvivah_access=([^;]*)/);
+    const role = getSessionRole() ?? "";
 
-    if (!hasToken || role !== "USER") {
+    if (!hasSession() || role !== "USER") {
       toast.error("Please sign in as a customer to book a video call.");
       startNavigationFeedback();
       router.push(loginUrlWithReturn());

@@ -1,4 +1,5 @@
 "use client";
+import { hasSession } from "@/lib/session";
 
 import * as React from "react";
 import { apiRequest } from "@/services/api";
@@ -23,7 +24,7 @@ export function RecommendedForYouSection() {
     let active = true;
 
     // Skip API call entirely for anonymous users — avoids 401 console noise
-    const hasToken = typeof document !== "undefined" && document.cookie.includes("tatvivah_access=");
+    const hasToken = hasSession();
     if (!hasToken) {
       setProducts([]);
       setLoading(false);

@@ -281,14 +281,29 @@ export function proxy(request: NextRequest) {
       const loginUrl = buildSubdomainUrl(correctSub, "/login?force=1", request);
       const response = NextResponse.redirect(loginUrl);
 
-      // Clear all auth cookies via Set-Cookie headers
+      // Clear all auth cookies via Set-Cookie headers.
+      //
+      // Both scopes must be cleared: the client writes a domain-scoped cookie
+      // and falls back to a host-only one when the browser rejects the domain,
+      // so clearing only `Domain=.base` can leave a stale host-only cookie
+      // behind — which then shadows the next login and loops the user.
       const cookieExpiry = "Thu, 01 Jan 1970 00:00:00 GMT";
       const cookieDomain = getBaseDomain(host || "");
-      const clearOpts = `Path=/; Expires=${cookieExpiry}; Domain=.${cookieDomain}; SameSite=Lax; Secure`;
-      response.headers.append("Set-Cookie", `tatvivah_access=; ${clearOpts}`);
-      response.headers.append("Set-Cookie", `tatvivah_refresh=; ${clearOpts}`);
-      response.headers.append("Set-Cookie", `tatvivah_role=; ${clearOpts}`);
-      response.headers.append("Set-Cookie", `tatvivah_user=; ${clearOpts}`);
+      const secure = request.nextUrl.protocol === "https:" ? "; Secure" : "";
+      const clearScopes = [
+        `Path=/; Expires=${cookieExpiry}; Domain=.${cookieDomain}; SameSite=Lax${secure}`,
+        `Path=/; Expires=${cookieExpiry}; SameSite=Lax${secure}`,
+      ];
+      for (const clearOpts of clearScopes) {
+        for (const name of [
+          "tatvivah_access",
+          "tatvivah_refresh",
+          "tatvivah_role",
+          "tatvivah_user",
+        ]) {
+          response.headers.append("Set-Cookie", `${name}=; ${clearOpts}`);
+        }
+      }
 
       if (subPrefix) {
         response.headers.set("x-robots-tag", "noindex, nofollow");
@@ -319,9 +334,13 @@ export function proxy(request: NextRequest) {
     // Public / non-protected page → allow through
     response = NextResponse.next();
   } else if (!hasSession || !role) {
-    // Protected route with no session → redirect to login
+    // Protected route with no session → redirect to login.
+    // `force=1` marks this as a deliberate bounce so the auth-page rule above
+    // cannot immediately redirect back to a dashboard if a partial cookie set
+    // arrives between the two requests — that ping-pong is the login loop.
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("returnTo", pathname);
+    loginUrl.searchParams.set("force", "1");
     response = NextResponse.redirect(loginUrl);
   } else if (crossDomain && subPrefix && !isRoleAllowedOnSubdomain(role, subPrefix)) {
     // Authenticated on a subdomain but wrong role → correct subdomain dashboard

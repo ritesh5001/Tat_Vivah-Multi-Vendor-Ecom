@@ -1,4 +1,4 @@
-import { apiRequest } from "@/services/api";
+import { apiRequest, ensureFreshAccessToken } from "@/services/api";
 
 export interface OrderItem {
   id: string;
@@ -125,11 +125,9 @@ export async function downloadInvoice(orderId: string): Promise<void> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!API_BASE_URL) throw new Error("API base URL is not configured");
 
-  const match =
-    typeof document !== "undefined"
-      ? document.cookie.match(/(?:^|; )tatvivah_access=([^;]*)/)
-      : null;
-  const token = match ? decodeURIComponent(match[1]) : null;
+  // Renew first: this bypasses apiRequest, so without it the download fails
+  // as soon as the short-lived access token has aged out.
+  const token = await ensureFreshAccessToken();
 
   const res = await fetch(`${API_BASE_URL}/v1/orders/${orderId}/invoice`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},

@@ -1,4 +1,17 @@
 import { setSessionCookie, clearSessionCookie } from "@/lib/cookie";
+import {
+  ACCESS_COOKIE,
+  REFRESH_COOKIE,
+  ROLE_COOKIE,
+  USER_COOKIE,
+} from "@/lib/session";
+
+/**
+ * Lifetime for every session cookie, matched to the refresh token's 7 days so
+ * the cookies never expire out of step with each other. Token validity is a
+ * property of the JWT, not of how long we kept the cookie.
+ */
+const SESSION_COOKIE_MAX_AGE_SECONDS = 604800;
 
 export interface LoginPayload {
   identifier: string;
@@ -93,10 +106,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function clearAuthSession(): void {
   if (typeof document === "undefined") return;
-  clearSessionCookie("tatvivah_access");
-  clearSessionCookie("tatvivah_refresh");
-  clearSessionCookie("tatvivah_role");
-  clearSessionCookie("tatvivah_user");
+  clearSessionCookie(ACCESS_COOKIE);
+  clearSessionCookie(REFRESH_COOKIE);
+  clearSessionCookie(ROLE_COOKIE);
+  clearSessionCookie(USER_COOKIE);
   window.dispatchEvent(new Event("tatvivah-auth"));
 }
 
@@ -111,17 +124,32 @@ export function persistAuthCookies(
   refreshToken: string,
   user: { role: string;[key: string]: unknown }
 ): void {
-  setSessionCookie("tatvivah_access", accessToken, 86400);
-  setSessionCookie("tatvivah_refresh", refreshToken, 604800);
-  // role/user must outlive the daily access cookie — they identify the
-  // session for the middleware while the refresh cookie (7d) is still valid.
-  setSessionCookie("tatvivah_role", user.role, 604800);
+  // All four share one lifetime. When the access cookie expired a day before
+  // the others, the browser was left holding half a session and the app
+  // disagreed with itself about whether the user was signed in.
+  const stored = setSessionCookie(
+    ACCESS_COOKIE,
+    accessToken,
+    SESSION_COOKIE_MAX_AGE_SECONDS
+  );
+  setSessionCookie(REFRESH_COOKIE, refreshToken, SESSION_COOKIE_MAX_AGE_SECONDS);
+  setSessionCookie(ROLE_COOKIE, user.role, SESSION_COOKIE_MAX_AGE_SECONDS);
   setSessionCookie(
-    "tatvivah_user",
+    USER_COOKIE,
     encodeURIComponent(JSON.stringify(user)),
-    604800
+    SESSION_COOKIE_MAX_AGE_SECONDS
   );
   window.dispatchEvent(new Event("tatvivah-auth"));
+
+  if (!stored) {
+    // The browser refused every cookie variant, so the session cannot survive
+    // this navigation. Say so loudly: silently continuing is what produced a
+    // login that "worked" and then asked for a login again, forever.
+    throw new Error(
+      "Your browser blocked the sign-in cookie, so the session could not be saved. " +
+        "Please allow cookies for this site (and disable private/tracking blocking) and try again."
+    );
+  }
 }
 
 export function signOut(redirectTo: string = "/login?force=1"): void {

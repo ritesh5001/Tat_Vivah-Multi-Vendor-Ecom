@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  decodeJwtPayload,
+  getAccessToken,
+  getSessionRole,
+  getSessionUser,
+  hasSession,
+} from "@/lib/session";
 
 interface User {
     id: string;
@@ -8,62 +15,44 @@ interface User {
     [key: string]: any;
 }
 
-function readCookie(name: string): string | null {
-    if (typeof document === "undefined") return null;
-    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-    return match ? decodeURIComponent(match[1]) : null;
-}
-
-function decodeJwtPayload(token: string): User | null {
-    try {
-        const part = token.split(".")[1];
-        if (!part) return null;
-        const base64 = part.replace(/-/g, "+").replace(/_/g, "/");
-        const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-        return JSON.parse(atob(padded)) as User;
-    } catch {
-        return null;
-    }
-}
-
 export function useAuth() {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const [signedIn, setSignedIn] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const syncAuth = () => {
-            const accessToken = readCookie("tatvivah_access");
-            const refreshToken = readCookie("tatvivah_refresh");
-            const roleCookie = readCookie("tatvivah_role");
-            const userCookie = readCookie("tatvivah_user");
+            // `hasSession` is the single authority on "is this a session" — an
+            // expired access token with a live refresh token still counts,
+            // because the API layer renews it silently. Deriving this from the
+            // access cookie alone used to make the header claim the buyer was
+            // signed out while the rest of the app knew they were signed in.
+            const authed = hasSession();
+            setSignedIn(authed);
+            setToken(getAccessToken());
 
-            setToken(accessToken);
-
-            // The access cookie expires daily; a live refresh cookie still
-            // means an authenticated session (restored silently on first API
-            // call), so keep showing the user as signed in.
-            if (!accessToken && !refreshToken) {
+            if (!authed) {
                 setUser(null);
                 setLoading(false);
                 return;
             }
 
-            if (userCookie) {
-                try {
-                    setUser(JSON.parse(userCookie) as User);
-                    setLoading(false);
-                    return;
-                } catch {
-                    // Fall through to JWT decode.
-                }
+            const storedUser = getSessionUser<User>();
+            if (storedUser) {
+                setUser(storedUser);
+                setLoading(false);
+                return;
             }
 
-            const decoded = accessToken ? decodeJwtPayload(accessToken) : null;
+            const accessToken = getAccessToken();
+            const decoded = accessToken ? decodeJwtPayload<User>(accessToken) : null;
+            const role = getSessionRole();
+
             if (decoded) {
                 setUser(decoded);
-            } else if (roleCookie) {
-                setUser({ id: "", role: roleCookie } as User);
+            } else if (role) {
+                setUser({ id: "", role } as User);
             } else {
                 setUser(null);
             }
@@ -90,5 +79,5 @@ export function useAuth() {
         };
     }, []);
 
-    return { user, token, loading };
+    return { user, token, loading, isSignedIn: signedIn };
 }

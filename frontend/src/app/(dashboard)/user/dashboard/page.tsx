@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { listBuyerOrders } from "@/services/orders";
 import { toast } from "sonner";
+import { getSessionUser, hasSession } from "@/lib/session";
 
 const quickLinks = [
   { label: "Browse Marketplace", href: "/marketplace", description: "Discover curated collections" },
@@ -41,20 +42,13 @@ export default function UserDashboardPage() {
   >([]);
 
   React.useEffect(() => {
-    const match = document.cookie.match(/(?:^|; )tatvivah_user=([^;]*)/);
-    if (match) {
-      try {
-        setUser(JSON.parse(decodeURIComponent(match[1])));
-      } catch {
-        setUser(null);
-      }
-    }
+    setUser(getSessionUser());
   }, []);
 
   React.useEffect(() => {
-    // Skip API call if user has no auth token
-    const hasToken = document.cookie.includes("tatvivah_access=");
-    if (!hasToken) return;
+    // An expired access token with a live refresh token is still a session —
+    // the API layer renews it — so gate on the shared check, not the cookie.
+    if (!hasSession()) return;
 
     const loadOrders = async () => {
       try {

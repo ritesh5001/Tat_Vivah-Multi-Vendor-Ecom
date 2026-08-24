@@ -1,5 +1,15 @@
 import { setSessionCookie, clearSessionCookie } from "@/lib/cookie";
 import { reportApiActivity } from "@/lib/navigation-feedback";
+import {
+  ACCESS_COOKIE,
+  REFRESH_COOKIE,
+  ROLE_COOKIE,
+  USER_COOKIE,
+  canRefreshSession,
+  getAccessToken,
+  getRefreshToken,
+  isTokenExpired,
+} from "@/lib/session";
 
 type ApiRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -19,6 +29,17 @@ const API_BASE_URL =
   (process.env.NODE_ENV === "development" ? "http://localhost:5000" : "");
 
 const DEV_FALLBACK_API_BASE_URL = "http://localhost:5000";
+
+/**
+ * Lifetime for BOTH session cookies, matched to the refresh token's 7 days.
+ *
+ * The access cookie used to expire after 1 day while the refresh cookie lasted
+ * 7, so on days 2-7 the browser held "half" a session: pages that gated on the
+ * access cookie bounced the buyer to login while the middleware happily let
+ * them through — the login loop. Cookie lifetime now says only "we hold a
+ * token"; whether that token is still *valid* is read from its own `exp`.
+ */
+const SESSION_COOKIE_MAX_AGE_SECONDS = 604800;
 
 /**
  * Default request timeout. Measured latencies against the live stack: ~2.5s for a
@@ -56,22 +77,6 @@ export const swrConfig = {
   revalidateOnReconnect: false,
   errorRetryCount: 2,
 } as const;
-
-function getAuthToken(): string | null {
-  if (typeof document === "undefined") {
-    return null;
-  }
-  const match = document.cookie.match(/(?:^|; )tatvivah_access=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-function getRefreshToken(): string | null {
-  if (typeof document === "undefined") {
-    return null;
-  }
-  const match = document.cookie.match(/(?:^|; )tatvivah_refresh=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
 
 function getErrorMessage(data: unknown, fallback: string) {
   const payload =
@@ -116,12 +121,20 @@ function getActivityLabel(method: string) {
   return "Processing your request";
 }
 
+/**
+ * Drop the session and tell the app about it.
+ *
+ * Only ever called when the session is provably unrecoverable: no refresh
+ * token, or the server rejected the one we hold. Clearing on anything else
+ * (notably a 403, which means "authenticated but not allowed to do THIS")
+ * signed people out mid-session and looped them back to login.
+ */
 function clearAuthCookies() {
   if (typeof document === "undefined") return;
-  clearSessionCookie("tatvivah_access");
-  clearSessionCookie("tatvivah_refresh");
-  clearSessionCookie("tatvivah_role");
-  clearSessionCookie("tatvivah_user");
+  clearSessionCookie(ACCESS_COOKIE);
+  clearSessionCookie(REFRESH_COOKIE);
+  clearSessionCookie(ROLE_COOKIE);
+  clearSessionCookie(USER_COOKIE);
   window.dispatchEvent(new Event("tatvivah-auth"));
 }
 
@@ -145,9 +158,9 @@ async function requestNewTokens(refreshToken: string): Promise<string | null> {
   if (!data?.accessToken) return null;
 
   // Persist new tokens (host-only fallback if domain-scoped write is rejected)
-  setSessionCookie("tatvivah_access", data.accessToken, 86400);
+  setSessionCookie(ACCESS_COOKIE, data.accessToken, SESSION_COOKIE_MAX_AGE_SECONDS);
   if (data.refreshToken) {
-    setSessionCookie("tatvivah_refresh", data.refreshToken, 604800);
+    setSessionCookie(REFRESH_COOKIE, data.refreshToken, SESSION_COOKIE_MAX_AGE_SECONDS);
   }
 
   return data.accessToken as string;
@@ -184,6 +197,18 @@ async function silentRefresh(): Promise<string | null> {
   })();
 
   return _refreshPromise;
+}
+
+/**
+ * The access token to use for a hand-rolled `fetch` (file downloads, SSE) that
+ * cannot go through `apiRequest`. Renews it first when it has expired, so these
+ * callers stop failing silently once the 15-minute token ages out.
+ */
+export async function ensureFreshAccessToken(): Promise<string | null> {
+  const current = getAccessToken();
+  if (!isTokenExpired(current)) return current;
+  if (!canRefreshSession()) return current;
+  return (await silentRefresh()) ?? current;
 }
 
 function isNetworkError(error: unknown): boolean {
@@ -234,7 +259,27 @@ export async function apiRequest<T>(
   const method = normalizeMethod(rest.method);
   const shouldTrackActivity =
     typeof window !== "undefined" && isMutationMethod(method) && !_isRetry;
-  const authToken = token ?? getAuthToken();
+
+  let authToken = token ?? getAccessToken();
+
+  /*
+   * Renew an already-dead token BEFORE spending a round-trip on it.
+   *
+   * Access tokens live 15 minutes but their cookie lives days, so most requests
+   * in a long session would otherwise be sent with a token that is certain to
+   * be rejected. Refreshing up front keeps mutations (add to cart, place order)
+   * from failing on their first attempt, and means an expired token is never
+   * mistaken for "signed out".
+   */
+  if (
+    typeof document !== "undefined" &&
+    !_isRetry &&
+    isTokenExpired(authToken) &&
+    canRefreshSession()
+  ) {
+    const renewed = await silentRefresh();
+    if (renewed) authToken = renewed;
+  }
 
   const finalHeaders: HeadersInit = {
     ...(body ? { "Content-Type": "application/json" } : {}),
@@ -277,17 +322,33 @@ export async function apiRequest<T>(
         const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-          // On 401, attempt a silent token refresh before giving up
-          if (response.status === 401 && !_isRetry && !token) {
+          /*
+           * 401 means "this access token is not good enough" — which is the
+           * NORMAL state once a 15-minute token ages out, not a reason to sign
+           * anyone out. Always try the refresh token first; `_isRetry` is the
+           * only thing that stops a loop.
+           *
+           * Two earlier rules here caused the login loop and are deliberately
+           * gone:
+           *   - the refresh was skipped whenever the caller passed an explicit
+           *     `token` (checkout addresses, order history, settlements all do),
+           *     so those calls jumped straight to wiping the session;
+           *   - a 403 wiped the session too, even though 403 means the user IS
+           *     authenticated and merely may not touch that one resource
+           *     ("not your order", "insufficient permissions").
+           */
+          if (response.status === 401 && !_isRetry) {
             const newToken = await silentRefresh();
             if (newToken) {
-              // Retry the original request with the fresh token
+              // Retry the original request with the fresh token.
               return apiRequest<T>(path, { ...options, token: newToken, _isRetry: true });
             }
-            // Refresh failed — clear session
-            clearAuthCookies();
-          } else if (response.status === 401 || response.status === 403) {
-            clearAuthCookies();
+            // Only give up on the session when there is genuinely nothing left
+            // to refresh with. A transient refresh failure (network blip, a
+            // rotation race another tab won) must not destroy the session.
+            if (!canRefreshSession()) {
+              clearAuthCookies();
+            }
           }
           throw new Error(getErrorMessage(data, "Request failed"));
         }

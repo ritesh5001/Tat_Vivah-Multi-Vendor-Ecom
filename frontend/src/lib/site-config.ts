@@ -53,6 +53,13 @@ const explicitCookieDomain = (process.env.NEXT_PUBLIC_COOKIE_DOMAIN ?? "")
 
 const effectiveCookieDomain = explicitCookieDomain || deriveCookieDomain(SITE_URL);
 
+/**
+ * Base domain the session cookies are shared across (no leading dot), or "" to
+ * write host-only cookies. `lib/cookie.ts` composes the attributes at write
+ * time so `Secure` can track the page's actual protocol.
+ */
+export const COOKIE_DOMAIN = effectiveCookieDomain;
+
 export const COOKIE_ATTRIBUTES_SUFFIX =
   process.env.NODE_ENV === "production"
     ? `${effectiveCookieDomain ? `; domain=.${effectiveCookieDomain}` : ""}; SameSite=Lax; Secure`
