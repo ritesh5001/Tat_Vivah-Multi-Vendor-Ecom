@@ -109,6 +109,22 @@ function buildSubdomainUrl(
   return new URL(`${proto}//${targetHost}${path}`);
 }
 
+/**
+ * Whether this request is a Next.js prefetch rather than a real navigation.
+ *
+ * Next sends `Next-Router-Prefetch` for `<Link>`/`router.prefetch` warm-ups;
+ * the `purpose` variants cover browser-initiated speculative loads.
+ */
+function isPrefetchRequest(request: NextRequest): boolean {
+  const headers = request.headers;
+  return (
+    headers.get("next-router-prefetch") === "1" ||
+    headers.get("purpose") === "prefetch" ||
+    headers.get("x-purpose") === "prefetch" ||
+    headers.get("x-moz") === "prefetch"
+  );
+}
+
 /** Check if a role is allowed on a given subdomain (null = main domain). */
 function isRoleAllowedOnSubdomain(
   role: string,
@@ -161,12 +177,21 @@ function isPublicShopPage(pathname: string): boolean {
 /*  AUTH CONFIGURATION                                                        */
 /* ──────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * Routes the proxy bounces to /login when no session cookie is present.
+ *
+ * `/checkout` is deliberately NOT in this list. It is a fully client-rendered
+ * page whose every data call is bearer-authenticated by the API, so a proxy
+ * redirect adds no protection — but it does add a redirect that the Next client
+ * Router Cache can store against the /checkout key and replay forever (see the
+ * prefetch note below). The page gates itself with `hasSession()` on mount,
+ * which is re-evaluated on every navigation and can never go stale.
+ */
 const protectedRoutes = [
   "/seller",
   "/admin",
   "/user",
   "/profile",
-  "/checkout"
 ];
 
 const authPages = ["/login", "/register", "/(auth)", "/forgot-password", "/reset-password"];
@@ -252,6 +277,32 @@ export function proxy(request: NextRequest) {
         break;
       }
     }
+  }
+
+  /* ── STEP 2.5: A prefetch is never answered with a redirect ─────────────── */
+
+  /*
+   * Next stores whatever a prefetch returned in the client Router Cache, keyed
+   * by URL. Answering a prefetch of a gated route with "go to /login" — which
+   * is what happens any time the route is warmed before the buyer signs in —
+   * caches that redirect, and every LATER client-side navigation to the same
+   * URL replays it without asking the server again. Signing in writes fresh
+   * cookies but does not touch the router cache, so the buyer is bounced to
+   * login on a session that is perfectly valid, over and over, until the entry
+   * ages out ("it works after a while") or the page is hard-reloaded ("it works
+   * after a hard refresh"). That is exactly the Buy Now / Proceed to Checkout
+   * loop.
+   *
+   * A prefetch fetches markup nobody has navigated to yet, so letting it
+   * through leaks nothing: the real navigation is still gated below, and every
+   * API call behind these pages is authenticated on its own.
+   */
+  if (isPrefetchRequest(request)) {
+    const prefetchResponse = NextResponse.next();
+    if (subPrefix) {
+      prefetchResponse.headers.set("x-robots-tag", "noindex, nofollow");
+    }
+    return prefetchResponse;
   }
 
   /* ── STEP 3: SESSION LOCK — role must match subdomain ────────────────────── */

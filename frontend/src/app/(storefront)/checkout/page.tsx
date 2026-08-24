@@ -17,6 +17,9 @@ import FastrrCheckout, {
   notifyFastrrFallback,
 } from "@/components/checkout/fastrr-checkout";
 import { getCheckoutConfig } from "@/services/fastrr";
+import { hasSession } from "@/lib/session";
+import { loginUrlWithReturn } from "@/lib/login-redirect";
+import { startNavigationFeedback } from "@/lib/navigation-feedback";
 import { toast } from "sonner";
 import {
   CHECKOUT_ADDRESSES_CACHE_KEY,
@@ -44,11 +47,30 @@ const currency = new Intl.NumberFormat("en-IN", {
  * and the escape hatch behind "Use Standard Checkout".
  */
 export default function CheckoutPage() {
+  const router = useRouter();
   const [provider, setProvider] = React.useState<
     "LOADING" | "FASTRR" | "NATIVE"
   >("LOADING");
 
   React.useEffect(() => {
+    /*
+     * The session gate lives here, not in the proxy.
+     *
+     * A proxy redirect to /login is cached by the Next client Router Cache
+     * against this URL, so once it was ever issued — a prefetch, or a genuine
+     * bounce before the buyer signed in — every subsequent Buy Now / Proceed to
+     * Checkout replayed it against a session that had since become valid. This
+     * check runs on each mount instead, reads the cookies as they are right now,
+     * and uses the same `hasSession()` the Buy Now button uses, so the two can
+     * never disagree about whether the buyer is signed in.
+     */
+    if (!hasSession()) {
+      toast.error("Please sign in to continue.");
+      startNavigationFeedback();
+      router.replace(loginUrlWithReturn());
+      return;
+    }
+
     // Read the flag from the URL directly rather than via useSearchParams: the
     // decision is already client-only, and useSearchParams would opt this whole
     // route out of prerendering unless wrapped in its own Suspense boundary.
@@ -74,7 +96,7 @@ export default function CheckoutPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [router]);
 
   const handleFallback = React.useCallback((reason: string) => {
     notifyFastrrFallback(reason);
