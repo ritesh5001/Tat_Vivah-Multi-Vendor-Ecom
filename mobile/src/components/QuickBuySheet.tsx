@@ -1,5 +1,12 @@
 import * as React from "react";
-import { View, StyleSheet, Pressable, Modal, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Modal,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { Icon } from "./Icon";
 import { useQuery } from "@tanstack/react-query";
@@ -53,6 +60,19 @@ export function QuickBuySheet({
   onClose: () => void;
 }) {
   const router = useRouter();
+  /**
+   * The sheet is sized from the window rather than from percentages.
+   *
+   * "width: 100%" and "maxHeight: 76%" resolve against the Android dialog
+   * window the Modal creates, and on a re-open that window is measured before
+   * the edge-to-edge insets land — so the second time the sheet was opened it
+   * came back wider than the screen and pushed off to the right. Real numbers
+   * cannot be mis-measured. This mirrors MenuSheet, which sizes its drawer the
+   * same way for the same reason.
+   */
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const sheetWidth = Math.min(420, windowWidth - spacing.lg * 2);
+  const sheetMaxHeight = Math.round(windowHeight * 0.76);
   const { addToCart } = useCart();
   const { session } = useAuth();
   const { showToast } = useToast();
@@ -216,9 +236,20 @@ export function QuickBuySheet({
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent
+      navigationBarTranslucent
     >
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
+      <Pressable
+        style={[styles.backdrop, { width: windowWidth, height: windowHeight }]}
+        onPress={onClose}
+      >
+        <Pressable
+          style={[
+            styles.sheet,
+            { width: sheetWidth, maxHeight: sheetMaxHeight },
+          ]}
+          onPress={(event) => event.stopPropagation()}
+        >
           <View style={styles.grabber} />
 
           {loading ? (
@@ -358,15 +389,19 @@ export function QuickBuySheet({
 
 const styles = StyleSheet.create({
   backdrop: {
-    flex: 1,
+    // Anchored to the window's top-left rather than stretched to fill the
+    // dialog, so the centred sheet lands on the screen's centre even if the
+    // dialog window itself comes back oversized.
+    position: "absolute",
+    top: 0,
+    left: 0,
     backgroundColor: "rgba(20,18,16,0.5)",
     justifyContent: "center",
     alignItems: "center",
     padding: spacing.lg,
   },
   sheet: {
-    width: "100%",
-    maxWidth: 420,
+    alignSelf: "center",
     backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.borderSoft,
@@ -374,7 +409,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     paddingTop: spacing.md,
-    maxHeight: "76%",
     shadowColor: colors.shadow,
     shadowOpacity: 0.24,
     shadowOffset: { width: 0, height: 12 },
@@ -413,7 +447,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.charcoal,
   },
-  body: { marginTop: spacing.lg },
+  body: { marginTop: spacing.lg, flexShrink: 1 },
   sectionLabel: {
     fontFamily: typography.sansMedium,
     fontSize: 11,
