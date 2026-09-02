@@ -38,11 +38,18 @@ export function QuickBuySheet({
   productId,
   intent,
   visible,
+  initialColor = null,
   onClose,
 }: {
   productId: string | null;
   intent: QuickBuyIntent;
   visible: boolean;
+  /**
+   * Colour already chosen by the shopper, as a lowercased label. Opened from a
+   * product page that has one, the sheet must not quietly switch them to a
+   * different colour just because it preselects the first in-stock one.
+   */
+  initialColor?: string | null;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -107,7 +114,11 @@ export function QuickBuySheet({
           .filter((variant) => variant.inventory == null || variant.inventory.stock > 0)
           .map((variant) => (variant.color ?? "").toLowerCase())
       );
-      const preferred = colors_.find((color) => stocked.has(color.key)) ?? colors_[0];
+      const seeded = initialColor
+        ? colors_.find((color) => color.key === initialColor)
+        : undefined;
+      const preferred =
+        seeded ?? colors_.find((color) => stocked.has(color.key)) ?? colors_[0];
       setSelectedColor(preferred.key);
     }
     if (variants.length === 1) {
@@ -117,7 +128,7 @@ export function QuickBuySheet({
     if (sizesForColor.length === 1) {
       setSelectedVariantId(sizesForColor[0].variant.id);
     }
-  }, [visible, variants, colors_, selectedColor, sizesForColor]);
+  }, [visible, variants, colors_, selectedColor, sizesForColor, initialColor]);
 
   React.useEffect(() => {
     if (visible) return;

@@ -490,12 +490,20 @@ export default function ProductDetailScreen() {
   );
   const [quickBuyId, setQuickBuyId] = React.useState<string | null>(null);
   const [quickBuyIntent, setQuickBuyIntent] = React.useState<QuickBuyIntent>("cart");
+  /**
+   * Colour to open the sheet on. Only ever set for *this* product — a related
+   * product has its own palette, and seeding it with this page's colour would
+   * preselect something that product may not even sell.
+   */
+  const [quickBuyColor, setQuickBuyColor] = React.useState<string | null>(null);
   const openQuickAdd = React.useCallback((id: string) => {
     setQuickBuyIntent("cart");
+    setQuickBuyColor(null);
     setQuickBuyId(id);
   }, []);
   const openBuyNow = React.useCallback((id: string) => {
     setQuickBuyIntent("buy");
+    setQuickBuyColor(null);
     setQuickBuyId(id);
   }, []);
   const tryOnProgress = useSharedValue(0);
@@ -946,6 +954,7 @@ export default function ProductDetailScreen() {
     // query and shows a loader until they arrive.
     if (isHydratingVariants) {
       setQuickBuyIntent("cart");
+      setQuickBuyColor(selectedColor || null);
       setQuickBuyId(product.id);
       return;
     }
@@ -1029,6 +1038,7 @@ export default function ProductDetailScreen() {
     windowWidth,
     stickyBarTopY,
     promptForSize,
+    selectedColor,
   ]);
 
   const handleBuyNow = React.useCallback(async () => {
@@ -1049,6 +1059,7 @@ export default function ProductDetailScreen() {
     // place to land, not a "no variants" toast that is about to be wrong.
     if (isHydratingVariants) {
       setQuickBuyIntent("buy");
+      setQuickBuyColor(selectedColor || null);
       setQuickBuyId(product.id);
       return;
     }
@@ -1056,8 +1067,15 @@ export default function ProductDetailScreen() {
       showToast("This variant is out of stock", "info");
       return;
     }
+    // Swipe-to-buy is a committed gesture, so the missing size is asked for in a
+    // sheet that can finish the purchase. Add to bag still nudges the inline row
+    // instead: it has no follow-through to protect, and covering the swatches
+    // the shopper is already reading would be the worse trade there.
     if (!selectedVariant) {
-      promptForSize();
+      impactLight();
+      setQuickBuyIntent("buy");
+      setQuickBuyColor(selectedColor || null);
+      setQuickBuyId(product.id);
       return;
     }
     if (!fallbackVariant) {
@@ -1067,10 +1085,6 @@ export default function ProductDetailScreen() {
           : "Variants are not available for this item",
         "info"
       );
-      return;
-    }
-    if (outOfStock) {
-      showToast("This variant is out of stock", "info");
       return;
     }
 
@@ -1128,7 +1142,7 @@ export default function ProductDetailScreen() {
     router,
     showToast,
     images,
-    promptForSize,
+    selectedColor,
   ]);
 
   const handleSwipeAddToCart = React.useCallback(
@@ -2449,6 +2463,7 @@ export default function ProductDetailScreen() {
       <QuickBuySheet
         productId={quickBuyId}
         intent={quickBuyIntent}
+        initialColor={quickBuyColor}
         visible={Boolean(quickBuyId)}
         onClose={() => setQuickBuyId(null)}
       />
