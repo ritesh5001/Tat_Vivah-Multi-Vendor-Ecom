@@ -30,7 +30,20 @@ const envSchema = z.object({
         return !(normalized === 'false' || normalized === '0' || normalized === 'off');
     }),
     BACKEND_WARMUP_URL: z.string().url('BACKEND_WARMUP_URL must be a valid URL').optional(),
-    BACKEND_WARMUP_INTERVAL_MS: z.string().default('240000').transform(Number),
+    // 14 minutes: Render's free tier spins a service down after 15 minutes
+    // without inbound traffic, so this is the longest ping that still keeps it
+    // up. It used to be 4 minutes, which kept Render awake 3x more often than
+    // necessary and — when BACKEND_WARMUP_URL points at a DB-backed route —
+    // kept Neon's compute awake with it.
+    BACKEND_WARMUP_INTERVAL_MS: z.string().default('840000').transform(Number),
+    // How often the consolidated maintenance sweep runs. See MAINTENANCE_INTERVAL_MS
+    // in server.ts for why this is deliberately long.
+    MAINTENANCE_INTERVAL_MS: z.string().default('1800000').transform(Number),
+    // How long after the last real request the storefront cache keeps being
+    // warmed. Warming exists so a shopper never pays for a cold read; with no
+    // shoppers there is nothing to protect, and the queries only serve to keep
+    // the database from ever suspending.
+    CATALOG_WARMUP_IDLE_AFTER_MS: z.string().default('1800000').transform(Number),
     PRISMA_LOG_QUERIES: z.string().default('false').transform((v) => {
         const normalized = v.trim().toLowerCase();
         return normalized === 'true' || normalized === '1' || normalized === 'on';

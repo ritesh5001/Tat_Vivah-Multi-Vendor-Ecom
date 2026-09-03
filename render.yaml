@@ -20,10 +20,24 @@ services:
       # loads. The ping code already existed but never ran because this URL was
       # unset. Must be the service's own PUBLIC url, not localhost, or it does
       # not count as inbound traffic.
+      # Point this at /health/live, not /health. The plain /health route runs
+      # SELECT 1 against Postgres, so pinging it would wake Neon's compute on
+      # every cycle and undo the scale-to-zero savings below.
       - key: BACKEND_WARMUP_URL
         sync: false
+      # 14 minutes: the longest ping that still beats Render's ~15 minute idle
+      # spin-down. Was 240000 (4 min), which pinged 3x more often than needed.
       - key: BACKEND_WARMUP_INTERVAL_MS
-        value: "240000"
+        value: "840000"
+      # Consolidated maintenance sweep (stale orders, inventory integrity,
+      # appointments, Fastrr reconciliation). Long on purpose: Neon suspends the
+      # compute after 5 minutes without a query, so frequent jobs meant the
+      # database was billed 24/7. Raise toward 3600000 to save more.
+      - key: MAINTENANCE_INTERVAL_MS
+        value: "1800000"
+      # Stop warming the storefront cache once the site has been quiet this long.
+      - key: CATALOG_WARMUP_IDLE_AFTER_MS
+        value: "1800000"
       # Shiprocket Checkout (Fastrr). The key/secret are set in the Render
       # dashboard, not here — they sign every request to Shiprocket.
       - key: FASTRR_API_KEY
